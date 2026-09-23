@@ -94,12 +94,27 @@ document.getElementById('btn-historial').addEventListener('click', async () => {
     modal.style.display = 'flex';
     lista.innerHTML = '<p style="text-align: center; color: var(--texto-secundario);"><i class="fa-solid fa-spinner fa-spin"></i> Sincronizando con Foliar Drive...</p>';
     
-    try {
-        const snapshot = await db.collection("usuarios").doc(usuarioActual.uid).collection("archivos").orderBy("fecha", "desc").get();
-        if (snapshot.empty) {
-            lista.innerHTML = '<p style="text-align: center; color: var(--texto-secundario);">Tu disco está vacío. ¡Procesa tu primer PDF!</p>';
-            return;
-        }
+    snapshot.forEach(doc => {
+        const archivo = doc.data();
+        const fecha = archivo.fecha ? archivo.fecha.toDate().toLocaleDateString() : 'Reciente';
+        
+        // EL TRUCO: Inyectamos una orden en la URL para obligar al servidor a usar el nombre original
+        const urlDescarga = archivo.url.replace('/upload/', '/upload/fl_attachment:' + encodeURIComponent(archivo.nombre) + '/');
+        
+        lista.innerHTML += `
+            <div style="background: var(--bg-principal); padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--borde);">
+                <div>
+                    <h4 style="margin: 0; color: var(--texto-principal); font-size: 1rem;">${archivo.nombre}</h4>
+                    <p style="margin: 5px 0 0; font-size: 0.85rem; color: var(--texto-secundario);">
+                        <span style="background: var(--color-foco); color: white; padding: 2px 8px; border-radius: 10px; margin-right: 10px;">${archivo.herramienta}</span> 
+                        ${fecha}
+                    </p>
+                </div>
+                <a href="${urlDescarga}" class="btn-secundario" style="margin: 0; text-decoration: none;"><i class="fa-solid fa-download"></i> Descargar</a>
+            </div>
+        `;
+    });
+        
         
         lista.innerHTML = '';
         snapshot.forEach(doc => {
