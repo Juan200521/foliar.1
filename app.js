@@ -106,8 +106,9 @@ document.getElementById('btn-historial').addEventListener('click', async () => {
             const archivo = doc.data();
             const fecha = archivo.fecha ? archivo.fecha.toDate().toLocaleDateString() : 'Reciente';
             
-            // EL TRUCO: Inyectamos una orden en la URL para obligar al servidor a usar el nombre original
-            const urlDescarga = archivo.url.replace('/upload/', '/upload/fl_attachment:' + encodeURIComponent(archivo.nombre) + '/');
+           // Corregido: Le quitamos la extensión al nombre para que Cloudinary no se confunda
+            const nombreSinExtension = archivo.nombre.replace(/\.[^/.]+$/, "");
+            const urlDescarga = archivo.url.replace('/upload/', '/upload/fl_attachment:' + encodeURIComponent(nombreSinExtension) + '/');
             
             lista.innerHTML += `
                 <div style="background: var(--bg-principal); padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--borde);">
