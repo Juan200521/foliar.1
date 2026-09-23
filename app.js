@@ -791,3 +791,18 @@ document.getElementById('botonRecortar').addEventListener('click', async () => {
     respaldarEnFoliarDrive(new Blob([bytesFinales], { type: 'application/pdf' }), nombreDescarga, "Recortar PDF");
   } catch (e) { manejarErrorControlado(e); }
 });
+
+// ==========================================
+// CONTROLADOR DE HERRAMIENTAS
+// ==========================================
+window.abrirHerramienta = function(nombreHerramienta) {
+    if (!usuarioActual) {
+        alert("🔒 Por favor, inicia sesión con Google para usar las herramientas.");
+        return;
+    }
+    
+    // Alerta temporal para comprobar que el botón revivió
+    alert("Herramienta seleccionada: " + nombreHerramienta);
+    
+    // Aquí pondremos el código para abrir la pantalla de trabajo de la herramienta
+};
