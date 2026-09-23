@@ -12,6 +12,8 @@ const firebaseConfig = {
   measurementId: "G-E4GQKV7WD7"
 };
 
+// Forzar nuevo despliegue para destrabar GitHub
+
 // Inicializar Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
