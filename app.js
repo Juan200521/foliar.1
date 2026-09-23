@@ -66,9 +66,7 @@ function parseRangos(texto, totalPaginas) {
   return indices.filter(i => i >= 0 && i < totalPaginas);
 }
 
-// *** NUEVA FUNCIÓN: Genera nombres dinámicos ***
 function generarNombre(nombreOriginal, sufijo, extension = '.pdf') {
-  // Quita la extensión (.pdf, .jpg, etc.) del final del nombre original
   const nombreSinExtension = nombreOriginal.replace(/\.[^/.]+$/, "");
   return `${nombreSinExtension} ${sufijo}${extension}`;
 }
@@ -147,7 +145,8 @@ document.getElementById('archivoEliminar').addEventListener('change', async (e) 
     
     for (let n = 1; n <= totalPaginasEliminar; n++) {
       const pagina = await pdfLectura.getPage(n);
-      const viewport = pagina.getViewport({ scale: 0.4 }); 
+      // Escala aumentada para mayor calidad visual
+      const viewport = pagina.getViewport({ scale: 0.8 }); 
       
       const canvas = document.createElement('canvas');
       canvas.width = viewport.width; canvas.height = viewport.height;
@@ -159,7 +158,8 @@ document.getElementById('archivoEliminar').addEventListener('change', async (e) 
       
       const divNumero = document.createElement('div');
       divNumero.className = 'numero-pagina';
-      divNumero.textContent = n;
+      // Agregado el texto "Page"
+      divNumero.textContent = `Page ${n}`;
       
       divContenedor.appendChild(canvas);
       divContenedor.appendChild(divNumero);
@@ -224,7 +224,8 @@ document.getElementById('archivoOrdenar').addEventListener('change', async (e) =
     for (let n = 1; n <= totalPaginas; n++) {
       ordenPaginasArray.push(n - 1); 
       const pagina = await pdfLectura.getPage(n);
-      const viewport = pagina.getViewport({ scale: 0.4 });
+      // Escala aumentada para mayor calidad visual
+      const viewport = pagina.getViewport({ scale: 0.8 });
       
       const canvas = document.createElement('canvas');
       canvas.width = viewport.width; canvas.height = viewport.height;
@@ -237,7 +238,8 @@ document.getElementById('archivoOrdenar').addEventListener('change', async (e) =
       
       const divNumero = document.createElement('div');
       divNumero.className = 'numero-pagina';
-      divNumero.textContent = n; 
+      // Agregado el texto "Page"
+      divNumero.textContent = `Page ${n}`; 
       
       divContenedor.appendChild(canvas);
       divContenedor.appendChild(divNumero);
