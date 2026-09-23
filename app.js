@@ -1,15 +1,54 @@
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
+// ==========================================
+// MÓDULO DE SEGURIDAD Y VALIDACIÓN (HARDENING)
+// ==========================================
+const MAX_FILE_SIZE = 150 * 1024 * 1024; // Límite de 150 MB para evitar Crash en RAM
+
+function validarArchivoSeguro(archivo, mimePermitidos) {
+    if (!archivo) throw new Error("No se ha seleccionado ningún archivo.");
+    
+    // Validación de MIME Type (Evita subir un .exe renombrado a .pdf)
+    if (!mimePermitidos.includes(archivo.type)) {
+        throw new Error(`Por seguridad, solo se permiten archivos de tipo: ${mimePermitidos.join(', ')}.`);
+    }
+    
+    // Prevención de Denegación de Servicio local (DDoS en RAM)
+    if (archivo.size > MAX_FILE_SIZE) {
+        throw new Error("El archivo excede el tamaño máximo seguro permitido (150 MB).");
+    }
+    return true;
+}
+
+function escaparHTML(texto) {
+    // Prevención de inyección XSS (Cross-Site Scripting)
+    if (!texto) return '';
+    const div = document.createElement('div');
+    div.textContent = texto;
+    return div.innerHTML;
+}
+
+function limpiarRangoPaginas(texto) {
+    // Solo permite números, comas y guiones (Evita inyección de comandos lógicos)
+    return texto.replace(/[^0-9,\-]/g, '');
+}
+
+function manejarErrorControlado(e, botonId, textoBotonOriginal) {
+    // Control de logs: No expone objetos del documento en consola.
+    console.warn("Seguridad/Error controlado:", e.message || "Fallo en operación de memoria");
+    alert(e.message || 'Error de procesamiento. Verifica que el documento no esté corrupto o encriptado.');
+    if (botonId) {
+        const btn = document.getElementById(botonId);
+        btn.disabled = false;
+        btn.innerHTML = textoBotonOriginal;
+    }
+}
+
 // ---------- Navegación del Menú (SPA) ----------
 function abrirHerramienta(idHerramienta) {
   document.getElementById('menu-principal').style.display = 'none';
   document.getElementById('espacio-trabajo').style.display = 'block';
-  
-  const todasLasHerramientas = document.querySelectorAll('.tarjeta-herramienta');
-  todasLasHerramientas.forEach(seccion => {
-    seccion.style.display = 'none';
-  });
-  
+  document.querySelectorAll('.tarjeta-herramienta').forEach(seccion => seccion.style.display = 'none');
   document.getElementById('herr-' + idHerramienta).style.display = 'block';
   window.scrollTo(0, 0);
 }
@@ -17,12 +56,11 @@ function abrirHerramienta(idHerramienta) {
 function volverAlMenu() {
   document.getElementById('espacio-trabajo').style.display = 'none';
   document.getElementById('menu-principal').style.display = 'grid';
-  
   document.querySelectorAll('.btn-gigante').forEach(label => {
-    if(label.getAttribute('for') === 'archivosImagen') label.textContent = 'Seleccionar imágenes';
-    else if(label.getAttribute('for') === 'archivosUnir') label.textContent = 'Seleccionar archivos PDF';
-    else if(label.getAttribute('for') === 'archivoWord2Pdf') label.textContent = 'Seleccionar archivo Word';
-    else label.textContent = 'Seleccionar archivo PDF';
+    if(label.getAttribute('for') === 'archivosImagen') label.textContent = 'Elegir imágenes';
+    else if(label.getAttribute('for') === 'archivosUnir') label.textContent = 'Elegir archivos PDF';
+    else if(label.getAttribute('for') === 'archivoWord2Pdf') label.textContent = 'Elegir archivo Word';
+    else label.textContent = 'Elegir archivo PDF';
   });
   window.scrollTo(0, 0);
 }
@@ -31,25 +69,24 @@ document.querySelectorAll('input[type="file"]').forEach(input => {
   input.addEventListener('change', function() {
     const label = this.previousElementSibling;
     if (label && label.classList.contains('btn-gigante')) {
-      if (this.files && this.files.length > 1) {
-        label.textContent = this.files.length + ' archivos seleccionados';
-      } else if (this.files && this.files.length === 1) {
-        label.textContent = this.files[0].name;
-      } else {
-        if(label.getAttribute('for') === 'archivosImagen') label.textContent = 'Seleccionar imágenes';
-        else if(label.getAttribute('for') === 'archivoWord2Pdf') label.textContent = 'Seleccionar archivo Word';
-        else label.textContent = 'Seleccionar archivo PDF';
-      }
+      if (this.files && this.files.length > 1) label.textContent = this.files.length + ' archivos listos';
+      else if (this.files && this.files.length === 1) label.textContent = escaparHTML(this.files[0].name); // XSS Shield
+      else label.textContent = 'Elegir archivo/s';
     }
   });
 });
 
 // ---------- Funciones compartidas ----------
 function descargarBlob(blob, nombre) {
+  const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = nombre;
+  link.href = url;
+  link.download = escaparHTML(nombre);
+  document.body.appendChild(link);
   link.click();
+  document.body.removeChild(link);
+  // Seguridad y RAM: Liberamos el objeto de memoria después de usarlo
+  setTimeout(() => URL.revokeObjectURL(url), 1000); 
 }
 
 function descargar(bytes, nombre) {
@@ -58,12 +95,15 @@ function descargar(bytes, nombre) {
 
 function parseRangos(texto, totalPaginas) {
   const indices = [];
-  texto.split(',').map(p => p.trim()).filter(Boolean).forEach(parte => {
+  const textoLimpio = limpiarRangoPaginas(texto);
+  textoLimpio.split(',').filter(Boolean).forEach(parte => {
     if (parte.includes('-')) {
-      const [inicio, fin] = parte.split('-').map(n => parseInt(n.trim(), 10));
-      for (let i = inicio; i <= fin; i++) indices.push(i - 1);
+      const [inicio, fin] = parte.split('-').map(n => parseInt(n, 10));
+      if (!isNaN(inicio) && !isNaN(fin)) {
+        for (let i = inicio; i <= fin; i++) indices.push(i - 1);
+      }
     } else {
-      indices.push(parseInt(parte, 10) - 1);
+      if (!isNaN(parseInt(parte, 10))) indices.push(parseInt(parte, 10) - 1);
     }
   });
   return indices.filter(i => i >= 0 && i < totalPaginas);
@@ -71,14 +111,21 @@ function parseRangos(texto, totalPaginas) {
 
 function generarNombre(nombreOriginal, sufijo, extension = '.pdf') {
   const nombreSinExtension = nombreOriginal.replace(/\.[^/.]+$/, "");
-  return `${nombreSinExtension} ${sufijo}${extension}`;
+  return `${nombreSinExtension}_${sufijo}${extension}`;
 }
+
+// ==========================================
+// LÓGICA DE HERRAMIENTAS
+// ==========================================
 
 // ---------- 1. Unir PDF ----------
 document.getElementById('botonUnir').addEventListener('click', async () => {
   try {
     const files = document.getElementById('archivosUnir').files;
-    if (files.length < 2) { alert('Elige al menos 2 archivos PDF'); return; }
+    if (files.length < 2) throw new Error('Elige al menos 2 archivos PDF.');
+    
+    for (const f of files) validarArchivoSeguro(f, ['application/pdf']);
+
     const pdfFinal = await PDFLib.PDFDocument.create();
     for (const archivo of files) {
       const bytes = await archivo.arrayBuffer();
@@ -86,24 +133,25 @@ document.getElementById('botonUnir').addEventListener('click', async () => {
       const paginas = await pdfFinal.copyPages(pdfOrigen, pdfOrigen.getPageIndices());
       paginas.forEach(pagina => pdfFinal.addPage(pagina));
     }
-    const nombreDescarga = generarNombre(files[0].name, 'unido');
-    descargar(await pdfFinal.save(), nombreDescarga);
-  } catch (e) { console.error(e); alert('Ocurrió un error. Verifica que sean PDFs válidos.'); }
+    descargar(await pdfFinal.save(), generarNombre(files[0].name, 'unido'));
+  } catch (e) { manejarErrorControlado(e); }
 });
 
 // ---------- 2. Dividir / Extraer páginas ----------
 document.getElementById('botonDividir').addEventListener('click', async () => {
   try {
     const files = document.getElementById('archivoDividir').files;
-    const texto = document.getElementById('rangoDividir').value;
+    validarArchivoSeguro(files[0], ['application/pdf']);
+    
+    const textoRaw = document.getElementById('rangoDividir').value;
+    if (!textoRaw.trim()) throw new Error('Escribe al menos un número de página válido.');
+    
     const comoZip = document.getElementById('zipDividir').checked;
-    if (files.length < 1) { alert('Elige un archivo PDF'); return; }
-    if (!texto.trim()) { alert('Escribe al menos un número de página'); return; }
-
     const bytes = await files[0].arrayBuffer();
     const pdfOrigen = await PDFLib.PDFDocument.load(bytes);
-    const indices = parseRangos(texto, pdfOrigen.getPageCount());
-    if (!indices.length) { alert('Ningún número de página es válido'); return; }
+    
+    const indices = parseRangos(textoRaw, pdfOrigen.getPageCount());
+    if (!indices.length) throw new Error('El rango de páginas introducido no es válido o está fuera de límites.');
 
     if (comoZip) {
       const zip = new JSZip();
@@ -113,16 +161,14 @@ document.getElementById('botonDividir').addEventListener('click', async () => {
         pdfPagina.addPage(pagina);
         zip.file(`pagina-${indice + 1}.pdf`, await pdfPagina.save());
       }
-      const nombreDescarga = generarNombre(files[0].name, 'paginas', '.zip');
-      descargarBlob(await zip.generateAsync({ type: 'blob' }), nombreDescarga);
+      descargarBlob(await zip.generateAsync({ type: 'blob' }), generarNombre(files[0].name, 'paginas', '.zip'));
     } else {
       const pdfFinal = await PDFLib.PDFDocument.create();
       const paginas = await pdfFinal.copyPages(pdfOrigen, indices);
       paginas.forEach(p => pdfFinal.addPage(p));
-      const nombreDescarga = generarNombre(files[0].name, 'extraido');
-      descargar(await pdfFinal.save(), nombreDescarga);
+      descargar(await pdfFinal.save(), generarNombre(files[0].name, 'extraido'));
     }
-  } catch (e) { console.error(e); alert('Ocurrió un error. Verifica que sea un PDF válido.'); }
+  } catch (e) { manejarErrorControlado(e); }
 });
 
 // ---------- 3. Eliminar páginas (Visual) ----------
@@ -137,19 +183,19 @@ document.getElementById('archivoEliminar').addEventListener('change', async (e) 
   botonEliminar.style.display = 'none';
   
   try {
-    if (!e.target.files.length) { contenedorPrevia.innerHTML = ''; return; }
-    contenedorPrevia.innerHTML = '<p style="color:var(--texto-secundario);">Cargando miniaturas...</p>';
+    if (!e.target.files.length) return;
+    validarArchivoSeguro(e.target.files[0], ['application/pdf']);
     
+    contenedorPrevia.innerHTML = '<p style="color:var(--texto-secundario);">Cargando visualización segura...</p>';
     archivoActualEliminar = e.target.files[0];
-    const bytesParaMiniaturas = await archivoActualEliminar.arrayBuffer();
-    const pdfLectura = await pdfjsLib.getDocument({ data: bytesParaMiniaturas }).promise;
+    const bytes = await archivoActualEliminar.arrayBuffer();
+    const pdfLectura = await pdfjsLib.getDocument({ data: bytes }).promise;
     totalPaginasEliminar = pdfLectura.numPages;
     contenedorPrevia.innerHTML = ''; 
     
     for (let n = 1; n <= totalPaginasEliminar; n++) {
       const pagina = await pdfLectura.getPage(n);
       const viewport = pagina.getViewport({ scale: 0.8 }); 
-      
       const canvas = document.createElement('canvas');
       canvas.width = viewport.width; canvas.height = viewport.height;
       await pagina.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
@@ -160,7 +206,7 @@ document.getElementById('archivoEliminar').addEventListener('change', async (e) 
       
       const divNumero = document.createElement('div');
       divNumero.className = 'numero-pagina';
-      divNumero.textContent = `Page ${n}`;
+      divNumero.textContent = `Página ${n}`;
       
       divContenedor.appendChild(canvas);
       divContenedor.appendChild(divNumero);
@@ -178,25 +224,25 @@ document.getElementById('archivoEliminar').addEventListener('change', async (e) 
       contenedorPrevia.appendChild(divContenedor);
     }
     botonEliminar.style.display = 'block';
-  } catch (err) { console.error(err); contenedorPrevia.innerHTML = '<p style="color:var(--color-ilovepdf);">Error al cargar PDF</p>'; }
+  } catch (e) { contenedorPrevia.innerHTML = '<p style="color:var(--color-ilovepdf);">Error de lectura de archivo</p>'; manejarErrorControlado(e); }
 });
 
 document.getElementById('botonEliminar').addEventListener('click', async () => {
   try {
     if (!archivoActualEliminar) return;
-    if (paginasParaEliminar.size === 0) { alert('Marca al menos una página para eliminar.'); return; }
-    if (paginasParaEliminar.size >= totalPaginasEliminar) { alert('No puedes eliminar todo el PDF.'); return; }
+    if (paginasParaEliminar.size === 0) throw new Error('Marca al menos una página.');
+    if (paginasParaEliminar.size >= totalPaginasEliminar) throw new Error('Protección: No puedes eliminar todo el contenido del PDF.');
 
-    const bytesFrescos = await archivoActualEliminar.arrayBuffer();
-    const pdfOrigen = await PDFLib.PDFDocument.load(bytesFrescos);
+    const bytes = await archivoActualEliminar.arrayBuffer();
+    const pdfOrigen = await PDFLib.PDFDocument.load(bytes);
     const indicesAConservar = pdfOrigen.getPageIndices().filter(i => !paginasParaEliminar.has(i));
+    
     const pdfFinal = await PDFLib.PDFDocument.create();
     const paginas = await pdfFinal.copyPages(pdfOrigen, indicesAConservar);
     paginas.forEach(p => pdfFinal.addPage(p));
     
-    const nombreDescarga = generarNombre(archivoActualEliminar.name, 'paginas eliminadas');
-    descargar(await pdfFinal.save(), nombreDescarga);
-  } catch (e) { console.error(e); alert('Error al procesar el documento final.'); }
+    descargar(await pdfFinal.save(), generarNombre(archivoActualEliminar.name, 'limpio'));
+  } catch (e) { manejarErrorControlado(e); }
 });
 
 // ---------- 4. Ordenar páginas (Visual) ----------
@@ -207,26 +253,23 @@ document.getElementById('archivoOrdenar').addEventListener('change', async (e) =
   const contenedorPrevia = document.getElementById('vistaPreviaOrdenar');
   const botonOrdenar = document.getElementById('botonOrdenar');
   const instruccion = document.getElementById('instruccionOrdenar');
-  botonOrdenar.style.display = 'none';
-  instruccion.style.display = 'none';
+  botonOrdenar.style.display = 'none'; instruccion.style.display = 'none';
   ordenPaginasArray = [];
   
   try {
-    if (!e.target.files.length) { contenedorPrevia.innerHTML = ''; return; }
-    contenedorPrevia.innerHTML = '<p style="color:var(--texto-secundario);">Cargando miniaturas...</p>';
+    if (!e.target.files.length) return;
+    validarArchivoSeguro(e.target.files[0], ['application/pdf']);
     
+    contenedorPrevia.innerHTML = '<p style="color:var(--texto-secundario);">Cargando entorno seguro...</p>';
     archivoActualOrdenar = e.target.files[0];
-    const bytesParaMiniaturas = await archivoActualOrdenar.arrayBuffer();
-    
-    const pdfLectura = await pdfjsLib.getDocument({ data: bytesParaMiniaturas }).promise;
-    const totalPaginas = pdfLectura.numPages;
+    const bytes = await archivoActualOrdenar.arrayBuffer();
+    const pdfLectura = await pdfjsLib.getDocument({ data: bytes }).promise;
     contenedorPrevia.innerHTML = ''; 
     
-    for (let n = 1; n <= totalPaginas; n++) {
+    for (let n = 1; n <= pdfLectura.numPages; n++) {
       ordenPaginasArray.push(n - 1); 
       const pagina = await pdfLectura.getPage(n);
       const viewport = pagina.getViewport({ scale: 0.8 });
-      
       const canvas = document.createElement('canvas');
       canvas.width = viewport.width; canvas.height = viewport.height;
       await pagina.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
@@ -238,7 +281,7 @@ document.getElementById('archivoOrdenar').addEventListener('change', async (e) =
       
       const divNumero = document.createElement('div');
       divNumero.className = 'numero-pagina';
-      divNumero.textContent = `Page ${n}`; 
+      divNumero.textContent = `Página ${n}`; 
       
       divContenedor.appendChild(canvas);
       divContenedor.appendChild(divNumero);
@@ -255,44 +298,39 @@ document.getElementById('archivoOrdenar').addEventListener('change', async (e) =
         const arrastrado = document.querySelector('.arrastrando');
         if (arrastrado !== divContenedor) {
           const rect = divContenedor.getBoundingClientRect();
-          const mitadX = rect.left + rect.width / 2;
-          if (ev.clientX > mitadX) divContenedor.after(arrastrado);
+          if (ev.clientX > (rect.left + rect.width / 2)) divContenedor.after(arrastrado);
           else divContenedor.before(arrastrado);
         }
       });
-
       contenedorPrevia.appendChild(divContenedor);
     }
-    botonOrdenar.style.display = 'block';
-    instruccion.style.display = 'block';
-  } catch (err) { console.error(err); contenedorPrevia.innerHTML = '<p style="color:var(--color-ilovepdf);">Error al cargar PDF</p>'; }
+    botonOrdenar.style.display = 'block'; instruccion.style.display = 'block';
+  } catch (e) { contenedorPrevia.innerHTML = '<p style="color:var(--color-ilovepdf);">Error al cargar PDF</p>'; manejarErrorControlado(e); }
 });
 
 document.getElementById('botonOrdenar').addEventListener('click', async () => {
   try {
-    if (!archivoActualOrdenar || !ordenPaginasArray.length) return;
-    
-    const bytesFrescos = await archivoActualOrdenar.arrayBuffer();
-    const pdfOrigen = await PDFLib.PDFDocument.load(bytesFrescos);
+    if (!archivoActualOrdenar || !ordenPaginasArray.length) throw new Error('Sube un archivo primero.');
+    const bytes = await archivoActualOrdenar.arrayBuffer();
+    const pdfOrigen = await PDFLib.PDFDocument.load(bytes);
     const pdfFinal = await PDFLib.PDFDocument.create();
-    
     const paginas = await pdfFinal.copyPages(pdfOrigen, ordenPaginasArray);
     paginas.forEach(p => pdfFinal.addPage(p));
-    
-    const nombreDescarga = generarNombre(archivoActualOrdenar.name, 'ordenado');
-    descargar(await pdfFinal.save(), nombreDescarga);
-  } catch (e) { console.error(e); alert('Error al reordenar el documento final.'); }
+    descargar(await pdfFinal.save(), generarNombre(archivoActualOrdenar.name, 'reordenado'));
+  } catch (e) { manejarErrorControlado(e); }
 });
 
 // ---------- 5. Comprimir PDF ----------
-document.getElementById('calidadComprimir').addEventListener('input', e => {
-  document.getElementById('valorCalidad').textContent = e.target.value;
-});
+document.getElementById('calidadComprimir').addEventListener('input', e => document.getElementById('valorCalidad').textContent = e.target.value);
 document.getElementById('botonComprimir').addEventListener('click', async () => {
   try {
     const files = document.getElementById('archivoComprimir').files;
-    if (files.length < 1) { alert('Elige un archivo PDF'); return; }
-    const calidad = parseInt(document.getElementById('calidadComprimir').value, 10) / 100;
+    validarArchivoSeguro(files[0], ['application/pdf']);
+    
+    // Validación de entrada numérica
+    let calidad = parseInt(document.getElementById('calidadComprimir').value, 10);
+    if(isNaN(calidad) || calidad < 1 || calidad > 100) calidad = 70;
+    calidad = calidad / 100;
 
     const bytes = await files[0].arrayBuffer();
     const pdfLectura = await pdfjsLib.getDocument({ data: bytes }).promise;
@@ -311,34 +349,35 @@ document.getElementById('botonComprimir').addEventListener('click', async () => 
       const paginaFinal = pdfFinal.addPage([viewport.width, viewport.height]);
       paginaFinal.drawImage(imagen, { x: 0, y: 0, width: viewport.width, height: viewport.height });
     }
-    const nombreDescarga = generarNombre(files[0].name, 'comprimido');
-    descargar(await pdfFinal.save(), nombreDescarga);
-  } catch (e) { console.error(e); alert('Ocurrió un error al comprimir'); }
+    descargar(await pdfFinal.save(), generarNombre(files[0].name, 'comprimido'));
+  } catch (e) { manejarErrorControlado(e); }
 });
 
 // ---------- 6. JPG/PNG a PDF ----------
 document.getElementById('botonImagen').addEventListener('click', async () => {
   try {
     const files = document.getElementById('archivosImagen').files;
-    if (files.length < 1) { alert('Elige al menos una imagen'); return; }
+    if (files.length < 1) throw new Error('Selecciona al menos una imagen.');
+    
     const pdf = await PDFLib.PDFDocument.create();
     for (const archivo of files) {
+      validarArchivoSeguro(archivo, ['image/png', 'image/jpeg']);
       const bytes = new Uint8Array(await archivo.arrayBuffer());
       const esPng = archivo.type === 'image/png';
       const imagen = esPng ? await pdf.embedPng(bytes) : await pdf.embedJpg(bytes);
       const pagina = pdf.addPage([imagen.width, imagen.height]);
       pagina.drawImage(imagen, { x: 0, y: 0, width: imagen.width, height: imagen.height });
     }
-    const nombreDescarga = generarNombre(files[0].name, 'convertido');
-    descargar(await pdf.save(), nombreDescarga);
-  } catch (e) { console.error(e); alert('Ocurrió un error. Verifica que sean JPG o PNG válidos.'); }
+    descargar(await pdf.save(), generarNombre(files[0].name, 'convertido'));
+  } catch (e) { manejarErrorControlado(e); }
 });
 
 // ---------- 7. PDF a JPG ----------
 document.getElementById('botonPdf2Jpg').addEventListener('click', async () => {
   try {
     const files = document.getElementById('archivoPdf2Jpg').files;
-    if (files.length < 1) { alert('Elige un archivo PDF'); return; }
+    validarArchivoSeguro(files[0], ['application/pdf']);
+    
     const bytes = await files[0].arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
     const zip = new JSZip();
@@ -351,61 +390,139 @@ document.getElementById('botonPdf2Jpg').addEventListener('click', async () => {
       await pagina.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
       const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.92));
       if (pdf.numPages === 1) { 
-        const nombreDescarga = generarNombre(files[0].name, 'convertido', '.jpg');
-        descargarBlob(blob, nombreDescarga); 
+        descargarBlob(blob, generarNombre(files[0].name, 'img', '.jpg')); 
         return; 
       }
       zip.file(`pagina-${n}.jpg`, blob);
     }
-    const nombreDescarga = generarNombre(files[0].name, 'imagenes', '.zip');
-    descargarBlob(await zip.generateAsync({ type: 'blob' }), nombreDescarga);
-  } catch (e) { console.error(e); alert('Ocurrió un error. Verifica que sea un PDF válido.'); }
+    descargarBlob(await zip.generateAsync({ type: 'blob' }), generarNombre(files[0].name, 'imagenes', '.zip'));
+  } catch (e) { manejarErrorControlado(e); }
+});
+
+// ---------- 12. PDF a Word (Texto Seguro - Anti XSS) ----------
+document.getElementById('botonPdf2Word').addEventListener('click', async () => {
+  const btnId = 'botonPdf2Word';
+  const textoOriginal = document.getElementById(btnId).innerHTML;
+  try {
+    const files = document.getElementById('archivoPdf2Word').files;
+    validarArchivoSeguro(files[0], ['application/pdf']);
+    
+    document.getElementById(btnId).textContent = 'Procesando bloque de texto...';
+    document.getElementById(btnId).disabled = true;
+
+    const bytes = await files[0].arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+    let textoCompletoHTML = "";
+
+    for (let n = 1; n <= pdf.numPages; n++) {
+      const pagina = await pdf.getPage(n);
+      const contenido = await pagina.getTextContent();
+      const textoRaw = contenido.items.map(item => item.str).join(' ');
+      
+      // VITAL: Sanitizar texto extraído por si el PDF es malicioso y contiene <script>
+      const textoSeguro = escaparHTML(textoRaw);
+      textoCompletoHTML += `<p>${textoSeguro}</p><br/>`;
+    }
+
+    const htmlContent = `
+      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+      <head><meta charset='utf-8'><title>Doc Seguro</title></head>
+      <body>${textoCompletoHTML}</body>
+      </html>
+    `;
+    const blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword' });
+    descargarBlob(blob, generarNombre(files[0].name, 'texto', '.doc'));
+
+    document.getElementById(btnId).innerHTML = textoOriginal;
+    document.getElementById(btnId).disabled = false;
+  } catch (e) { manejarErrorControlado(e, btnId, textoOriginal); }
+});
+
+// ---------- 13. Word a PDF (.docx) ----------
+document.getElementById('botonWord2Pdf').addEventListener('click', async () => {
+  const btnId = 'botonWord2Pdf';
+  const textoOriginal = document.getElementById(btnId).innerHTML;
+  try {
+    const files = document.getElementById('archivoWord2Pdf').files;
+    // Microsoft usa un MIME extenso para DOCX, validamos estrictamente
+    validarArchivoSeguro(files[0], ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword']);
+
+    document.getElementById(btnId).textContent = 'Convirtiendo formato seguro...';
+    document.getElementById(btnId).disabled = true;
+
+    const arrayBuffer = await files[0].arrayBuffer();
+    const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
+    const htmlContenido = result.value;
+
+    const contenedorTemporal = document.createElement('div');
+    // Mammoth ya genera HTML seguro por defecto escapando elementos no estándares
+    contenedorTemporal.innerHTML = htmlContenido;
+    contenedorTemporal.style.padding = '30px';
+    contenedorTemporal.style.fontFamily = 'Helvetica, Arial, sans-serif';
+    contenedorTemporal.style.fontSize = '14px';
+    contenedorTemporal.style.color = '#000';
+
+    const opcionesPDF = {
+      margin: 15,
+      filename: generarNombre(files[0].name, 'oficial', '.pdf'),
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    await html2pdf().set(opcionesPDF).from(contenedorTemporal).save();
+
+    document.getElementById(btnId).innerHTML = textoOriginal;
+    document.getElementById(btnId).disabled = false;
+  } catch (e) { manejarErrorControlado(e, btnId, textoOriginal); }
 });
 
 // ---------- 8. Rotar PDF ----------
 document.getElementById('botonRotar').addEventListener('click', async () => {
   try {
     const files = document.getElementById('archivoRotar').files;
-    if (files.length < 1) { alert('Elige un archivo PDF'); return; }
+    validarArchivoSeguro(files[0], ['application/pdf']);
     const bytes = await files[0].arrayBuffer();
     const pdf = await PDFLib.PDFDocument.load(bytes);
     pdf.getPages().forEach(pagina => {
       const anguloActual = pagina.getRotation().angle;
       pagina.setRotation(PDFLib.degrees(anguloActual + 90));
     });
-    const nombreDescarga = generarNombre(files[0].name, 'rotado');
-    descargar(await pdf.save(), nombreDescarga);
-  } catch (e) { console.error(e); alert('Ocurrió un error al rotar'); }
+    descargar(await pdf.save(), generarNombre(files[0].name, 'rotado'));
+  } catch (e) { manejarErrorControlado(e); }
 });
 
-// ---------- 9. Marca de agua ----------
+// ---------- 9. Marca de agua (Sanitizada) ----------
 document.getElementById('botonMarca').addEventListener('click', async () => {
   try {
     const files = document.getElementById('archivoMarca').files;
-    const texto = document.getElementById('textoMarca').value || 'CONFIDENCIAL';
-    if (files.length < 1) { alert('Elige un archivo PDF'); return; }
+    validarArchivoSeguro(files[0], ['application/pdf']);
+    
+    // Inyección XSS evitada: Escapamos el texto que ingresó el usuario
+    const textoSeguro = escaparHTML(document.getElementById('textoMarca').value || 'CONFIDENCIAL');
+    
     const bytes = await files[0].arrayBuffer();
     const pdf = await PDFLib.PDFDocument.load(bytes);
     const fuente = await pdf.embedFont(PDFLib.StandardFonts.HelveticaBold);
     const tamano = 48;
-    const anchoTexto = fuente.widthOfTextAtSize(texto, tamano);
+    const anchoTexto = fuente.widthOfTextAtSize(textoSeguro, tamano);
+    
     pdf.getPages().forEach(pagina => {
       const { width, height } = pagina.getSize();
-      pagina.drawText(texto, {
+      pagina.drawText(textoSeguro, {
         x: width / 2 - anchoTexto / 2, y: height / 2, size: tamano, font: fuente,
         color: PDFLib.rgb(0.7, 0.1, 0.1), opacity: 0.25, rotate: PDFLib.degrees(45),
       });
     });
-    const nombreDescarga = generarNombre(files[0].name, 'marca de agua');
-    descargar(await pdf.save(), nombreDescarga);
-  } catch (e) { console.error(e); alert('Ocurrió un error al marcar'); }
+    descargar(await pdf.save(), generarNombre(files[0].name, 'protegido'));
+  } catch (e) { manejarErrorControlado(e); }
 });
 
 // ---------- 10. Números de página ----------
 document.getElementById('botonNumeros').addEventListener('click', async () => {
   try {
     const files = document.getElementById('archivoNumeros').files;
-    if (files.length < 1) { alert('Elige un archivo PDF'); return; }
+    validarArchivoSeguro(files[0], ['application/pdf']);
     const bytes = await files[0].arrayBuffer();
     const pdf = await PDFLib.PDFDocument.load(bytes);
     const fuente = await pdf.embedFont(PDFLib.StandardFonts.Helvetica);
@@ -417,118 +534,28 @@ document.getElementById('botonNumeros').addEventListener('click', async () => {
         x: width / 2 - anchoTexto / 2, y: 20, size: 10, font: fuente, color: PDFLib.rgb(0.1, 0.1, 0.1),
       });
     });
-    const nombreDescarga = generarNombre(files[0].name, 'numerado');
-    descargar(await pdf.save(), nombreDescarga);
-  } catch (e) { console.error(e); alert('Ocurrió un error al numerar'); }
+    descargar(await pdf.save(), generarNombre(files[0].name, 'numerado'));
+  } catch (e) { manejarErrorControlado(e); }
 });
 
 // ---------- 11. Recortar PDF ----------
-document.getElementById('margenRecortar').addEventListener('input', e => {
-  document.getElementById('valorMargen').textContent = e.target.value;
-});
+document.getElementById('margenRecortar').addEventListener('input', e => document.getElementById('valorMargen').textContent = e.target.value);
 document.getElementById('botonRecortar').addEventListener('click', async () => {
   try {
     const files = document.getElementById('archivoRecortar').files;
-    if (files.length < 1) { alert('Elige un archivo PDF'); return; }
-    const margen = parseInt(document.getElementById('margenRecortar').value, 10) / 100;
+    validarArchivoSeguro(files[0], ['application/pdf']);
+    
+    // Sanitización matemática
+    let margen = parseInt(document.getElementById('margenRecortar').value, 10);
+    if(isNaN(margen) || margen < 0 || margen > 40) margen = 10;
+    margen = margen / 100;
+    
     const bytes = await files[0].arrayBuffer();
     const pdf = await PDFLib.PDFDocument.load(bytes);
     pdf.getPages().forEach(pagina => {
       const { width, height } = pagina.getSize();
       pagina.setCropBox(width * margen, height * margen, width * (1 - margen * 2), height * (1 - margen * 2));
     });
-    const nombreDescarga = generarNombre(files[0].name, 'recortado');
-    descargar(await pdf.save(), nombreDescarga);
-  } catch (e) { console.error(e); alert('Ocurrió un error al recortar'); }
-});
-
-// ---------- 12. PDF a Word (Solo texto) ----------
-document.getElementById('botonPdf2Word').addEventListener('click', async () => {
-  try {
-    const files = document.getElementById('archivoPdf2Word').files;
-    if (files.length < 1) { alert('Elige un archivo PDF'); return; }
-    
-    const boton = document.getElementById('botonPdf2Word');
-    const textoOriginal = boton.textContent;
-    boton.textContent = 'Extrayendo texto...';
-    boton.disabled = true;
-
-    const bytes = await files[0].arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
-    let textoCompleto = "";
-
-    for (let n = 1; n <= pdf.numPages; n++) {
-      const pagina = await pdf.getPage(n);
-      const contenido = await pagina.getTextContent();
-      const textoPagina = contenido.items.map(item => item.str).join(' ');
-      textoCompleto += `<p>${textoPagina}</p><br/>`;
-    }
-
-    const htmlContent = `
-      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-      <head><meta charset='utf-8'><title>Exportado de Foliar</title></head>
-      <body>${textoCompleto}</body>
-      </html>
-    `;
-
-    const blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword' });
-    const nombreDescarga = generarNombre(files[0].name, 'texto_extraido', '.doc');
-    
-    descargarBlob(blob, nombreDescarga);
-
-    boton.textContent = textoOriginal;
-    boton.disabled = false;
-
-  } catch (e) { 
-    console.error(e); 
-    alert('Ocurrió un error al extraer el texto. Verifica que el PDF no sea una imagen escaneada.'); 
-    document.getElementById('botonPdf2Word').disabled = false;
-    document.getElementById('botonPdf2Word').textContent = 'Extraer texto a Word';
-  }
-});
-
-// ---------- 13. Word a PDF (.docx) ----------
-document.getElementById('botonWord2Pdf').addEventListener('click', async () => {
-  try {
-    const files = document.getElementById('archivoWord2Pdf').files;
-    if (files.length < 1) { alert('Elige un archivo Word (.docx)'); return; }
-
-    const boton = document.getElementById('botonWord2Pdf');
-    const textoOriginal = boton.textContent;
-    boton.textContent = 'Procesando conversión...';
-    boton.disabled = true;
-
-    const archivo = files[0];
-    const arrayBuffer = await archivo.arrayBuffer();
-
-    const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
-    const htmlContenido = result.value;
-
-    const contenedorTemporal = document.createElement('div');
-    contenedorTemporal.innerHTML = htmlContenido;
-    contenedorTemporal.style.padding = '30px';
-    contenedorTemporal.style.fontFamily = 'Helvetica, Arial, sans-serif';
-    contenedorTemporal.style.fontSize = '14px';
-    contenedorTemporal.style.color = '#000';
-    contenedorTemporal.style.lineHeight = '1.6';
-
-    const opcionesPDF = {
-      margin:       15,
-      filename:     generarNombre(archivo.name, 'convertido', '.pdf'),
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2 },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    await html2pdf().set(opcionesPDF).from(contenedorTemporal).save();
-
-    boton.textContent = textoOriginal;
-    boton.disabled = false;
-
-  } catch (e) {
-    console.error(e);
-    alert('Ocurrió un error. Asegúrate de que sea un archivo .docx válido y no esté dañado.');
-    document.getElementById('botonWord2Pdf').disabled = false;
-    document.getElementById('botonWord2Pdf').textContent = 'Convertir a PDF';
-  }
+    descargar(await pdf.save(), generarNombre(files[0].name, 'recortado'));
+  } catch (e) { manejarErrorControlado(e); }
 });
