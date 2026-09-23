@@ -1,183 +1,213 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Foliar - Herramientas PDF</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <script src="app.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foliar - Herramientas PDF</title>
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <!-- Archivo CSS con etiqueta de versión para clientes -->
+    <link rel="stylesheet" href="style.css?v=1.0">
+    <!-- Librerías de procesamiento PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
-  <header class="cabecera">
-    <h1>Foliar</h1>
-    <p>Herramientas PDF seguras que corren 100% en tu navegador.</p>
-  </header>
-
-  <main class="contenedor-principal">
+    <div class="cabecera">
+        <h1>Foliar</h1>
+        <p>Procesamiento 100% en tu navegador. Rápido, seguro y privado.</p>
+    </div>
     
-    <!-- MENÚ PRINCIPAL -->
-    <div id="menu-principal" class="grid-menu">
-      <div class="tarjeta-menu" onclick="abrirHerramienta('unir')">
-        <h2>Unir PDF</h2><p>Une PDFs y ponlos en el orden que prefieras.</p>
-      </div>
-      <div class="tarjeta-menu" onclick="abrirHerramienta('dividir')">
-        <h2>Dividir PDF</h2><p>Extrae páginas o guarda cada hoja por separado.</p>
-      </div>
-      <div class="tarjeta-menu" onclick="abrirHerramienta('eliminar')">
-        <h2>Eliminar páginas</h2><p>Quita las páginas que no necesitas de tu PDF.</p>
-      </div>
-      <div class="tarjeta-menu" onclick="abrirHerramienta('ordenar')">
-        <h2>Ordenar páginas</h2><p>Organiza visualmente las hojas de tu documento.</p>
-      </div>
-      <div class="tarjeta-menu" onclick="abrirHerramienta('comprimir')">
-        <h2>Comprimir PDF</h2><p>Reduce el peso de tu archivo rápidamente.</p>
-      </div>
-      <div class="tarjeta-menu" onclick="abrirHerramienta('imagen')">
-        <h2>JPG a PDF</h2><p>Convierte tus imágenes en un documento PDF.</p>
-      </div>
-      <div class="tarjeta-menu" onclick="abrirHerramienta('pdf2jpg')">
-        <h2>PDF a JPG</h2><p>Extrae cada página como una imagen independiente.</p>
-      </div>
-      <div class="tarjeta-menu" onclick="abrirHerramienta('rotar')">
-        <h2>Rotar PDF</h2><p>Gira las páginas de tus documentos 90 grados.</p>
-      </div>
-      <div class="tarjeta-menu" onclick="abrirHerramienta('marca')">
-        <h2>Marca de agua</h2><p>Sella tus documentos con texto personalizado.</p>
-      </div>
-      <div class="tarjeta-menu" onclick="abrirHerramienta('numeros')">
-        <h2>Números de página</h2><p>Añade numeración a tu documento automáticamente.</p>
-      </div>
-      <div class="tarjeta-menu" onclick="abrirHerramienta('recortar')">
-        <h2>Recortar PDF</h2><p>Ajusta los márgenes de todas las páginas.</p>
-      </div>
+    <div class="contenedor-principal">
+        <!-- MENÚ PRINCIPAL -->
+        <div id="menu-principal" class="grid-menu">
+            <div class="tarjeta-menu" onclick="abrirHerramienta('unir')">
+                <h2>Unir PDF</h2>
+                <p>Combina múltiples archivos</p>
+            </div>
+            <div class="tarjeta-menu" onclick="abrirHerramienta('dividir')">
+                <h2>Dividir PDF</h2>
+                <p>Extrae páginas de tu archivo</p>
+            </div>
+            <div class="tarjeta-menu" onclick="abrirHerramienta('eliminar')">
+                <h2>Eliminar páginas</h2>
+                <p>Quita visualmente las páginas</p>
+            </div>
+            <div class="tarjeta-menu" onclick="abrirHerramienta('ordenar')">
+                <h2>Ordenar PDF</h2>
+                <p>Reorganiza arrastrando páginas</p>
+            </div>
+            <div class="tarjeta-menu" onclick="abrirHerramienta('comprimir')">
+                <h2>Comprimir PDF</h2>
+                <p>Reduce el peso de tu archivo</p>
+            </div>
+            <div class="tarjeta-menu" onclick="abrirHerramienta('imagen-pdf')">
+                <h2>JPG a PDF</h2>
+                <p>Convierte imágenes a documento</p>
+            </div>
+            <div class="tarjeta-menu" onclick="abrirHerramienta('pdf-jpg')">
+                <h2>PDF a JPG</h2>
+                <p>Extrae páginas como imágenes</p>
+            </div>
+            <div class="tarjeta-menu" onclick="abrirHerramienta('rotar')">
+                <h2>Rotar PDF</h2>
+                <p>Gira las páginas 90 grados</p>
+            </div>
+            <div class="tarjeta-menu" onclick="abrirHerramienta('marca')">
+                <h2>Marca de agua</h2>
+                <p>Protege tu documento</p>
+            </div>
+            <div class="tarjeta-menu" onclick="abrirHerramienta('numeros')">
+                <h2>Numerar páginas</h2>
+                <p>Añade números al pie</p>
+            </div>
+            <div class="tarjeta-menu" onclick="abrirHerramienta('recortar')">
+                <h2>Recortar PDF</h2>
+                <p>Ajusta márgenes del archivo</p>
+            </div>
+        </div>
+
+        <!-- ESPACIO DE TRABAJO -->
+        <div id="espacio-trabajo" style="display: none;">
+            <button class="btn-secundario" onclick="volverAlMenu()">← Volver al menú</button>
+
+            <!-- 1. Unir PDF -->
+            <div id="herr-unir" class="tarjeta-herramienta">
+                <h2 class="titulo-herramienta">Unir PDF</h2>
+                <div class="zona-subida">
+                    <label for="archivosUnir" class="btn-gigante">Seleccionar archivos PDF</label>
+                    <input type="file" id="archivosUnir" multiple accept=".pdf" style="display: none;">
+                </div>
+                <button id="botonUnir" class="btn-accion">Unir archivos</button>
+            </div>
+
+            <!-- 2. Dividir PDF -->
+            <div id="herr-dividir" class="tarjeta-herramienta">
+                <h2 class="titulo-herramienta">Dividir PDF</h2>
+                <div class="zona-subida">
+                    <label for="archivoDividir" class="btn-gigante">Seleccionar archivo PDF</label>
+                    <input type="file" id="archivoDividir" accept=".pdf" style="display: none;">
+                </div>
+                <div class="campo">
+                    <label>Rango de páginas (ej: 1, 3-5, 8)</label>
+                    <input type="text" id="rangoDividir" placeholder="1-5, 8, 11-13">
+                </div>
+                <div class="campo-checkbox">
+                    <label><input type="checkbox" id="zipDividir"> Extraer cada página como archivo separado (ZIP)</label>
+                </div>
+                <button id="botonDividir" class="btn-accion">Dividir PDF</button>
+            </div>
+
+            <!-- 3. Eliminar Páginas -->
+            <div id="herr-eliminar" class="tarjeta-herramienta">
+                <h2 class="titulo-herramienta">Eliminar páginas</h2>
+                <div class="zona-subida">
+                    <label for="archivoEliminar" class="btn-gigante">Seleccionar archivo PDF</label>
+                    <input type="file" id="archivoEliminar" accept=".pdf" style="display: none;">
+                </div>
+                <div id="vistaPreviaEliminar" class="vista-previa-grid"></div>
+                <button id="botonEliminar" class="btn-accion" style="display: none;">Eliminar páginas marcadas</button>
+            </div>
+
+            <!-- 4. Ordenar Páginas -->
+            <div id="herr-ordenar" class="tarjeta-herramienta">
+                <h2 class="titulo-herramienta">Ordenar páginas</h2>
+                <div class="zona-subida">
+                    <label for="archivoOrdenar" class="btn-gigante">Seleccionar archivo PDF</label>
+                    <input type="file" id="archivoOrdenar" accept=".pdf" style="display: none;">
+                </div>
+                <p id="instruccionOrdenar" style="display:none; text-align:center; color:var(--texto-secundario);">Arrastra y suelta las páginas para reordenarlas.</p>
+                <div id="vistaPreviaOrdenar" class="vista-previa-grid"></div>
+                <button id="botonOrdenar" class="btn-accion" style="display: none;">Guardar nuevo orden</button>
+            </div>
+
+            <!-- 5. Comprimir PDF -->
+            <div id="herr-comprimir" class="tarjeta-herramienta">
+                <h2 class="titulo-herramienta">Comprimir PDF</h2>
+                <div class="zona-subida">
+                    <label for="archivoComprimir" class="btn-gigante">Seleccionar archivo PDF</label>
+                    <input type="file" id="archivoComprimir" accept=".pdf" style="display: none;">
+                </div>
+                <div class="campo">
+                    <label>Calidad de compresión: <span id="valorCalidad">70</span>%</label>
+                    <input type="range" id="calidadComprimir" min="10" max="100" value="70">
+                </div>
+                <button id="botonComprimir" class="btn-accion">Comprimir PDF</button>
+            </div>
+
+            <!-- 6. JPG a PDF -->
+            <div id="herr-imagen-pdf" class="tarjeta-herramienta">
+                <h2 class="titulo-herramienta">JPG/PNG a PDF</h2>
+                <div class="zona-subida">
+                    <label for="archivosImagen" class="btn-gigante">Seleccionar imágenes</label>
+                    <input type="file" id="archivosImagen" multiple accept="image/png, image/jpeg" style="display: none;">
+                </div>
+                <button id="botonImagen" class="btn-accion">Convertir a PDF</button>
+            </div>
+
+            <!-- 7. PDF a JPG -->
+            <div id="herr-pdf-jpg" class="tarjeta-herramienta">
+                <h2 class="titulo-herramienta">PDF a JPG</h2>
+                <div class="zona-subida">
+                    <label for="archivoPdf2Jpg" class="btn-gigante">Seleccionar archivo PDF</label>
+                    <input type="file" id="archivoPdf2Jpg" accept=".pdf" style="display: none;">
+                </div>
+                <button id="botonPdf2Jpg" class="btn-accion">Extraer imágenes</button>
+            </div>
+
+            <!-- 8. Rotar PDF -->
+            <div id="herr-rotar" class="tarjeta-herramienta">
+                <h2 class="titulo-herramienta">Rotar PDF</h2>
+                <div class="zona-subida">
+                    <label for="archivoRotar" class="btn-gigante">Seleccionar archivo PDF</label>
+                    <input type="file" id="archivoRotar" accept=".pdf" style="display: none;">
+                </div>
+                <button id="botonRotar" class="btn-accion">Rotar 90°</button>
+            </div>
+
+            <!-- 9. Marca de agua -->
+            <div id="herr-marca" class="tarjeta-herramienta">
+                <h2 class="titulo-herramienta">Marca de agua</h2>
+                <div class="zona-subida">
+                    <label for="archivoMarca" class="btn-gigante">Seleccionar archivo PDF</label>
+                    <input type="file" id="archivoMarca" accept=".pdf" style="display: none;">
+                </div>
+                <div class="campo">
+                    <label>Texto de la marca</label>
+                    <input type="text" id="textoMarca" placeholder="Ej: CONFIDENCIAL">
+                </div>
+                <button id="botonMarca" class="btn-accion">Insertar marca de agua</button>
+            </div>
+
+            <!-- 10. Numerar Páginas -->
+            <div id="herr-numeros" class="tarjeta-herramienta">
+                <h2 class="titulo-herramienta">Numerar páginas</h2>
+                <div class="zona-subida">
+                    <label for="archivoNumeros" class="btn-gigante">Seleccionar archivo PDF</label>
+                    <input type="file" id="archivoNumeros" accept=".pdf" style="display: none;">
+                </div>
+                <button id="botonNumeros" class="btn-accion">Insertar números</button>
+            </div>
+
+            <!-- 11. Recortar PDF -->
+            <div id="herr-recortar" class="tarjeta-herramienta">
+                <h2 class="titulo-herramienta">Recortar PDF</h2>
+                <div class="zona-subida">
+                    <label for="archivoRecortar" class="btn-gigante">Seleccionar archivo PDF</label>
+                    <input type="file" id="archivoRecortar" accept=".pdf" style="display: none;">
+                </div>
+                <div class="campo">
+                    <label>Margen a recortar (%): <span id="valorMargen">10</span>%</label>
+                    <input type="range" id="margenRecortar" min="0" max="40" value="10">
+                </div>
+                <button id="botonRecortar" class="btn-accion">Aplicar recorte</button>
+            </div>
+
+        </div>
     </div>
 
-    <!-- ÁREA DE HERRAMIENTAS (Oculta por defecto) -->
-    <div id="espacio-trabajo" style="display: none;">
-      <button id="btn-volver" class="btn-secundario" onclick="volverAlMenu()">← Volver a todas las herramientas</button>
-
-      <!-- UNIR -->
-      <section id="herr-unir" class="tarjeta-herramienta" style="display: none;">
-        <h2 class="titulo-herramienta">Unir archivos PDF</h2>
-        <div class="zona-subida">
-          <label for="archivosUnir" class="btn-gigante">Seleccionar archivos PDF</label>
-          <input type="file" id="archivosUnir" accept="application/pdf" multiple style="display: none;">
-        </div>
-        <button id="botonUnir" class="btn-accion">Unir PDF</button>
-      </section>
-
-      <!-- DIVIDIR -->
-      <section id="herr-dividir" class="tarjeta-herramienta" style="display: none;">
-        <h2 class="titulo-herramienta">Dividir PDF</h2>
-        <div class="zona-subida">
-          <label for="archivoDividir" class="btn-gigante">Seleccionar archivo PDF</label>
-          <input type="file" id="archivoDividir" accept="application/pdf" style="display: none;">
-        </div>
-        <div class="campo"><label>Páginas (ej: 1-3,5,8-10):</label><input type="text" id="rangoDividir" placeholder="1-3,5"></div>
-        <div class="campo-checkbox"><label><input type="checkbox" id="zipDividir"> Cada página en un PDF separado (.zip)</label></div>
-        <button id="botonDividir" class="btn-accion">Extraer páginas</button>
-      </section>
-
-      <!-- ELIMINAR -->
-      <section id="herr-eliminar" class="tarjeta-herramienta" style="display: none;">
-        <h2 class="titulo-herramienta">Eliminar páginas</h2>
-        <div class="zona-subida">
-          <label for="archivoEliminar" class="btn-gigante">Seleccionar archivo PDF</label>
-          <input type="file" id="archivoEliminar" accept="application/pdf" style="display: none;">
-        </div>
-        <div id="vistaPreviaEliminar" class="vista-previa-grid"></div>
-        <button id="botonEliminar" class="btn-accion" style="display: none;">Eliminar páginas marcadas</button>
-      </section>
-
-      <!-- ORDENAR -->
-      <section id="herr-ordenar" class="tarjeta-herramienta" style="display: none;">
-        <h2 class="titulo-herramienta">Ordenar páginas</h2>
-        <div class="zona-subida">
-          <label for="archivoOrdenar" class="btn-gigante">Seleccionar archivo PDF</label>
-          <input type="file" id="archivoOrdenar" accept="application/pdf" style="display: none;">
-        </div>
-        <p id="instruccionOrdenar" style="display: none; text-align:center;">Arrastra las miniaturas para reordenar tu PDF.</p>
-        <div id="vistaPreviaOrdenar" class="vista-previa-grid"></div>
-        <button id="botonOrdenar" class="btn-accion" style="display: none;">Guardar nuevo orden</button>
-      </section>
-
-      <!-- COMPRIMIR -->
-      <section id="herr-comprimir" class="tarjeta-herramienta" style="display: none;">
-        <h2 class="titulo-herramienta">Comprimir PDF</h2>
-        <div class="zona-subida">
-          <label for="archivoComprimir" class="btn-gigante">Seleccionar archivo PDF</label>
-          <input type="file" id="archivoComprimir" accept="application/pdf" style="display: none;">
-        </div>
-        <div class="campo"><label>Calidad: <span id="valorCalidad">60</span>%</label><input type="range" id="calidadComprimir" min="20" max="90" value="60"></div>
-        <button id="botonComprimir" class="btn-accion">Comprimir PDF</button>
-      </section>
-
-      <!-- IMAGEN A PDF -->
-      <section id="herr-imagen" class="tarjeta-herramienta" style="display: none;">
-        <h2 class="titulo-herramienta">JPG a PDF</h2>
-        <div class="zona-subida">
-          <label for="archivosImagen" class="btn-gigante">Seleccionar imágenes</label>
-          <input type="file" id="archivosImagen" accept="image/jpeg,image/png" multiple style="display: none;">
-        </div>
-        <button id="botonImagen" class="btn-accion">Crear PDF</button>
-      </section>
-
-      <!-- PDF A JPG -->
-      <section id="herr-pdf2jpg" class="tarjeta-herramienta" style="display: none;">
-        <h2 class="titulo-herramienta">PDF a JPG</h2>
-        <div class="zona-subida">
-          <label for="archivoPdf2Jpg" class="btn-gigante">Seleccionar archivo PDF</label>
-          <input type="file" id="archivoPdf2Jpg" accept="application/pdf" style="display: none;">
-        </div>
-        <button id="botonPdf2Jpg" class="btn-accion">Convertir a JPG</button>
-      </section>
-
-      <!-- ROTAR -->
-      <section id="herr-rotar" class="tarjeta-herramienta" style="display: none;">
-        <h2 class="titulo-herramienta">Rotar PDF</h2>
-        <div class="zona-subida">
-          <label for="archivoRotar" class="btn-gigante">Seleccionar archivo PDF</label>
-          <input type="file" id="archivoRotar" accept="application/pdf" style="display: none;">
-        </div>
-        <button id="botonRotar" class="btn-accion">Rotar 90°</button>
-      </section>
-
-      <!-- MARCA DE AGUA -->
-      <section id="herr-marca" class="tarjeta-herramienta" style="display: none;">
-        <h2 class="titulo-herramienta">Marca de agua</h2>
-        <div class="zona-subida">
-          <label for="archivoMarca" class="btn-gigante">Seleccionar archivo PDF</label>
-          <input type="file" id="archivoMarca" accept="application/pdf" style="display: none;">
-        </div>
-        <div class="campo"><label>Texto:</label><input type="text" id="textoMarca" value="CONFIDENCIAL"></div>
-        <button id="botonMarca" class="btn-accion">Añadir marca de agua</button>
-      </section>
-
-      <!-- NUMEROS -->
-      <section id="herr-numeros" class="tarjeta-herramienta" style="display: none;">
-        <h2 class="titulo-herramienta">Números de página</h2>
-        <div class="zona-subida">
-          <label for="archivoNumeros" class="btn-gigante">Seleccionar archivo PDF</label>
-          <input type="file" id="archivoNumeros" accept="application/pdf" style="display: none;">
-        </div>
-        <button id="botonNumeros" class="btn-accion">Añadir números</button>
-      </section>
-
-      <!-- RECORTAR -->
-      <section id="herr-recortar" class="tarjeta-herramienta" style="display: none;">
-        <h2 class="titulo-herramienta">Recortar PDF</h2>
-        <div class="zona-subida">
-          <label for="archivoRecortar" class="btn-gigante">Seleccionar archivo PDF</label>
-          <input type="file" id="archivoRecortar" accept="application/pdf" style="display: none;">
-        </div>
-        <div class="campo"><label>Margen a recortar: <span id="valorMargen">10</span>%</label><input type="range" id="margenRecortar" min="0" max="40" value="10"></div>
-        <button id="botonRecortar" class="btn-accion">Recortar PDF</button>
-      </section>
-      
-    </div>
-  </main>
+    <!-- Archivo JS con etiqueta de versión para clientes -->
+    <script src="app.js?v=1.0" defer></script>
 </body>
 </html>
