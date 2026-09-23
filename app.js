@@ -21,6 +21,7 @@ function volverAlMenu() {
   document.querySelectorAll('.btn-gigante').forEach(label => {
     if(label.getAttribute('for') === 'archivosImagen') label.textContent = 'Seleccionar imágenes';
     else if(label.getAttribute('for') === 'archivosUnir') label.textContent = 'Seleccionar archivos PDF';
+    else if(label.getAttribute('for') === 'archivoWord2Pdf') label.textContent = 'Seleccionar archivo Word';
     else label.textContent = 'Seleccionar archivo PDF';
   });
   window.scrollTo(0, 0);
@@ -35,7 +36,9 @@ document.querySelectorAll('input[type="file"]').forEach(input => {
       } else if (this.files && this.files.length === 1) {
         label.textContent = this.files[0].name;
       } else {
-        label.textContent = 'Seleccionar archivo PDF';
+        if(label.getAttribute('for') === 'archivosImagen') label.textContent = 'Seleccionar imágenes';
+        else if(label.getAttribute('for') === 'archivoWord2Pdf') label.textContent = 'Seleccionar archivo Word';
+        else label.textContent = 'Seleccionar archivo PDF';
       }
     }
   });
@@ -145,7 +148,6 @@ document.getElementById('archivoEliminar').addEventListener('change', async (e) 
     
     for (let n = 1; n <= totalPaginasEliminar; n++) {
       const pagina = await pdfLectura.getPage(n);
-      // Escala aumentada para mayor calidad visual
       const viewport = pagina.getViewport({ scale: 0.8 }); 
       
       const canvas = document.createElement('canvas');
@@ -158,7 +160,6 @@ document.getElementById('archivoEliminar').addEventListener('change', async (e) 
       
       const divNumero = document.createElement('div');
       divNumero.className = 'numero-pagina';
-      // Agregado el texto "Page"
       divNumero.textContent = `Page ${n}`;
       
       divContenedor.appendChild(canvas);
@@ -224,7 +225,6 @@ document.getElementById('archivoOrdenar').addEventListener('change', async (e) =
     for (let n = 1; n <= totalPaginas; n++) {
       ordenPaginasArray.push(n - 1); 
       const pagina = await pdfLectura.getPage(n);
-      // Escala aumentada para mayor calidad visual
       const viewport = pagina.getViewport({ scale: 0.8 });
       
       const canvas = document.createElement('canvas');
@@ -238,7 +238,6 @@ document.getElementById('archivoOrdenar').addEventListener('change', async (e) =
       
       const divNumero = document.createElement('div');
       divNumero.className = 'numero-pagina';
-      // Agregado el texto "Page"
       divNumero.textContent = `Page ${n}`; 
       
       divContenedor.appendChild(canvas);
@@ -441,4 +440,95 @@ document.getElementById('botonRecortar').addEventListener('click', async () => {
     const nombreDescarga = generarNombre(files[0].name, 'recortado');
     descargar(await pdf.save(), nombreDescarga);
   } catch (e) { console.error(e); alert('Ocurrió un error al recortar'); }
+});
+
+// ---------- 12. PDF a Word (Solo texto) ----------
+document.getElementById('botonPdf2Word').addEventListener('click', async () => {
+  try {
+    const files = document.getElementById('archivoPdf2Word').files;
+    if (files.length < 1) { alert('Elige un archivo PDF'); return; }
+    
+    const boton = document.getElementById('botonPdf2Word');
+    const textoOriginal = boton.textContent;
+    boton.textContent = 'Extrayendo texto...';
+    boton.disabled = true;
+
+    const bytes = await files[0].arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+    let textoCompleto = "";
+
+    for (let n = 1; n <= pdf.numPages; n++) {
+      const pagina = await pdf.getPage(n);
+      const contenido = await pagina.getTextContent();
+      const textoPagina = contenido.items.map(item => item.str).join(' ');
+      textoCompleto += `<p>${textoPagina}</p><br/>`;
+    }
+
+    const htmlContent = `
+      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+      <head><meta charset='utf-8'><title>Exportado de Foliar</title></head>
+      <body>${textoCompleto}</body>
+      </html>
+    `;
+
+    const blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword' });
+    const nombreDescarga = generarNombre(files[0].name, 'texto_extraido', '.doc');
+    
+    descargarBlob(blob, nombreDescarga);
+
+    boton.textContent = textoOriginal;
+    boton.disabled = false;
+
+  } catch (e) { 
+    console.error(e); 
+    alert('Ocurrió un error al extraer el texto. Verifica que el PDF no sea una imagen escaneada.'); 
+    document.getElementById('botonPdf2Word').disabled = false;
+    document.getElementById('botonPdf2Word').textContent = 'Extraer texto a Word';
+  }
+});
+
+// ---------- 13. Word a PDF (.docx) ----------
+document.getElementById('botonWord2Pdf').addEventListener('click', async () => {
+  try {
+    const files = document.getElementById('archivoWord2Pdf').files;
+    if (files.length < 1) { alert('Elige un archivo Word (.docx)'); return; }
+
+    const boton = document.getElementById('botonWord2Pdf');
+    const textoOriginal = boton.textContent;
+    boton.textContent = 'Procesando conversión...';
+    boton.disabled = true;
+
+    const archivo = files[0];
+    const arrayBuffer = await archivo.arrayBuffer();
+
+    const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
+    const htmlContenido = result.value;
+
+    const contenedorTemporal = document.createElement('div');
+    contenedorTemporal.innerHTML = htmlContenido;
+    contenedorTemporal.style.padding = '30px';
+    contenedorTemporal.style.fontFamily = 'Helvetica, Arial, sans-serif';
+    contenedorTemporal.style.fontSize = '14px';
+    contenedorTemporal.style.color = '#000';
+    contenedorTemporal.style.lineHeight = '1.6';
+
+    const opcionesPDF = {
+      margin:       15,
+      filename:     generarNombre(archivo.name, 'convertido', '.pdf'),
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2 },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    await html2pdf().set(opcionesPDF).from(contenedorTemporal).save();
+
+    boton.textContent = textoOriginal;
+    boton.disabled = false;
+
+  } catch (e) {
+    console.error(e);
+    alert('Ocurrió un error. Asegúrate de que sea un archivo .docx válido y no esté dañado.');
+    document.getElementById('botonWord2Pdf').disabled = false;
+    document.getElementById('botonWord2Pdf').textContent = 'Convertir a PDF';
+  }
 });

@@ -8,12 +8,16 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg?v=1.0">
     <!-- Google Fonts -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
-    <!-- Archivo CSS con etiqueta de versión para clientes -->
-    <link rel="stylesheet" href="style.css?v=1.0">
-    <!-- Librerías de procesamiento PDF -->
+    <!-- Archivo CSS (Versión 1.1) -->
+    <link rel="stylesheet" href="style.css?v=1.1">
+    
+    <!-- Librerías de procesamiento -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- Nuevas librerías para conversión Word <-> PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
     <div class="cabecera">
@@ -52,6 +56,14 @@
                 <h2>PDF a JPG</h2>
                 <p>Extrae páginas como imágenes</p>
             </div>
+            <div class="tarjeta-menu" onclick="abrirHerramienta('pdf-word')">
+                <h2>PDF a Word</h2>
+                <p>Extrae el texto a documento</p>
+            </div>
+            <div class="tarjeta-menu" onclick="abrirHerramienta('word-pdf')">
+                <h2>Word a PDF</h2>
+                <p>Convierte documentos a PDF</p>
+            </div>
             <div class="tarjeta-menu" onclick="abrirHerramienta('rotar')">
                 <h2>Rotar PDF</h2>
                 <p>Gira las páginas 90 grados</p>
@@ -75,7 +87,7 @@
             <button class="btn-secundario" onclick="volverAlMenu()">← Volver al menú</button>
 
             <!-- 1. Unir PDF -->
-            <div id="herr-unir" class="tarjeta-herramienta">
+            <div id="herr-unir" class="tarjeta-herramienta" style="display: none;">
                 <h2 class="titulo-herramienta">Unir PDF</h2>
                 <div class="zona-subida">
                     <label for="archivosUnir" class="btn-gigante">Seleccionar archivos PDF</label>
@@ -85,7 +97,7 @@
             </div>
 
             <!-- 2. Dividir PDF -->
-            <div id="herr-dividir" class="tarjeta-herramienta">
+            <div id="herr-dividir" class="tarjeta-herramienta" style="display: none;">
                 <h2 class="titulo-herramienta">Dividir PDF</h2>
                 <div class="zona-subida">
                     <label for="archivoDividir" class="btn-gigante">Seleccionar archivo PDF</label>
@@ -102,7 +114,7 @@
             </div>
 
             <!-- 3. Eliminar Páginas -->
-            <div id="herr-eliminar" class="tarjeta-herramienta">
+            <div id="herr-eliminar" class="tarjeta-herramienta" style="display: none;">
                 <h2 class="titulo-herramienta">Eliminar páginas</h2>
                 <div class="zona-subida">
                     <label for="archivoEliminar" class="btn-gigante">Seleccionar archivo PDF</label>
@@ -113,7 +125,7 @@
             </div>
 
             <!-- 4. Ordenar Páginas -->
-            <div id="herr-ordenar" class="tarjeta-herramienta">
+            <div id="herr-ordenar" class="tarjeta-herramienta" style="display: none;">
                 <h2 class="titulo-herramienta">Ordenar páginas</h2>
                 <div class="zona-subida">
                     <label for="archivoOrdenar" class="btn-gigante">Seleccionar archivo PDF</label>
@@ -125,7 +137,7 @@
             </div>
 
             <!-- 5. Comprimir PDF -->
-            <div id="herr-comprimir" class="tarjeta-herramienta">
+            <div id="herr-comprimir" class="tarjeta-herramienta" style="display: none;">
                 <h2 class="titulo-herramienta">Comprimir PDF</h2>
                 <div class="zona-subida">
                     <label for="archivoComprimir" class="btn-gigante">Seleccionar archivo PDF</label>
@@ -139,7 +151,7 @@
             </div>
 
             <!-- 6. JPG a PDF -->
-            <div id="herr-imagen-pdf" class="tarjeta-herramienta">
+            <div id="herr-imagen-pdf" class="tarjeta-herramienta" style="display: none;">
                 <h2 class="titulo-herramienta">JPG/PNG a PDF</h2>
                 <div class="zona-subida">
                     <label for="archivosImagen" class="btn-gigante">Seleccionar imágenes</label>
@@ -149,7 +161,7 @@
             </div>
 
             <!-- 7. PDF a JPG -->
-            <div id="herr-pdf-jpg" class="tarjeta-herramienta">
+            <div id="herr-pdf-jpg" class="tarjeta-herramienta" style="display: none;">
                 <h2 class="titulo-herramienta">PDF a JPG</h2>
                 <div class="zona-subida">
                     <label for="archivoPdf2Jpg" class="btn-gigante">Seleccionar archivo PDF</label>
@@ -158,8 +170,34 @@
                 <button id="botonPdf2Jpg" class="btn-accion">Extraer imágenes</button>
             </div>
 
+            <!-- 12. PDF a Word -->
+            <div id="herr-pdf-word" class="tarjeta-herramienta" style="display: none;">
+                <h2 class="titulo-herramienta">PDF a Word (Texto)</h2>
+                <div class="zona-subida">
+                    <label for="archivoPdf2Word" class="btn-gigante">Seleccionar archivo PDF</label>
+                    <input type="file" id="archivoPdf2Word" accept=".pdf" style="display: none;">
+                </div>
+                <p style="text-align:center; color:var(--texto-secundario); margin-top: 1rem;">
+                    *Esta herramienta extrae el texto puro del PDF y genera un archivo de Word. No retiene imágenes ni diseños complejos.
+                </p>
+                <button id="botonPdf2Word" class="btn-accion">Extraer texto a Word</button>
+            </div>
+
+            <!-- 13. Word a PDF -->
+            <div id="herr-word-pdf" class="tarjeta-herramienta" style="display: none;">
+                <h2 class="titulo-herramienta">Word a PDF</h2>
+                <div class="zona-subida">
+                    <label for="archivoWord2Pdf" class="btn-gigante">Seleccionar archivo Word</label>
+                    <input type="file" id="archivoWord2Pdf" accept=".docx" style="display: none;">
+                </div>
+                <p style="text-align:center; color:var(--texto-secundario); margin-top: 1rem;">
+                    *Compatible únicamente con archivos modernos .docx. Procesamiento seguro en tu navegador sin servidores.
+                </p>
+                <button id="botonWord2Pdf" class="btn-accion">Convertir a PDF</button>
+            </div>
+
             <!-- 8. Rotar PDF -->
-            <div id="herr-rotar" class="tarjeta-herramienta">
+            <div id="herr-rotar" class="tarjeta-herramienta" style="display: none;">
                 <h2 class="titulo-herramienta">Rotar PDF</h2>
                 <div class="zona-subida">
                     <label for="archivoRotar" class="btn-gigante">Seleccionar archivo PDF</label>
@@ -169,7 +207,7 @@
             </div>
 
             <!-- 9. Marca de agua -->
-            <div id="herr-marca" class="tarjeta-herramienta">
+            <div id="herr-marca" class="tarjeta-herramienta" style="display: none;">
                 <h2 class="titulo-herramienta">Marca de agua</h2>
                 <div class="zona-subida">
                     <label for="archivoMarca" class="btn-gigante">Seleccionar archivo PDF</label>
@@ -183,7 +221,7 @@
             </div>
 
             <!-- 10. Numerar Páginas -->
-            <div id="herr-numeros" class="tarjeta-herramienta">
+            <div id="herr-numeros" class="tarjeta-herramienta" style="display: none;">
                 <h2 class="titulo-herramienta">Numerar páginas</h2>
                 <div class="zona-subida">
                     <label for="archivoNumeros" class="btn-gigante">Seleccionar archivo PDF</label>
@@ -193,7 +231,7 @@
             </div>
 
             <!-- 11. Recortar PDF -->
-            <div id="herr-recortar" class="tarjeta-herramienta">
+            <div id="herr-recortar" class="tarjeta-herramienta" style="display: none;">
                 <h2 class="titulo-herramienta">Recortar PDF</h2>
                 <div class="zona-subida">
                     <label for="archivoRecortar" class="btn-gigante">Seleccionar archivo PDF</label>
@@ -209,7 +247,7 @@
         </div>
     </div>
 
-    <!-- Archivo JS con etiqueta de versión para clientes -->
-    <script src="app.js?v=1.0" defer></script>
+    <!-- Archivo JS (Versión 1.1) -->
+    <script src="app.js?v=1.1" defer></script>
 </body>
 </html>
