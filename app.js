@@ -1,7 +1,7 @@
 // ==========================================
 // 1. CONFIGURACIÓN DE FIREBASE (SEGURIDAD)
 // ==========================================
-// REEMPLAZA LOS VALORES DENTRO DE LAS COMILLAS CON TUS LLAVES DE FIREBASE
+// REEMPLAZA LOS VALORES CON TUS LLAVES DE FIREBASE
 const firebaseConfig = {
   apiKey: "AIzaSyDHoRCZZ25LR06O06IF8OwMh-q_az15lkQ",
   authDomain: "foliar-7358a.firebaseapp.com",
@@ -9,7 +9,7 @@ const firebaseConfig = {
   storageBucket: "foliar-7358a.firebasestorage.app",
   messagingSenderId: "663236664000",
   appId: "1:663236664000:web:5348752418a6a8dff42b25",
-  measurementId: "G-ABCDEFG123"
+  measurementId: "G-E4GQKV7WD7"
 };
 
 // Inicializar Firebase
@@ -18,7 +18,15 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 // ==========================================
-// 2. LÓGICA DE USUARIOS (LOGIN CON GOOGLE)
+// 1.5 CONFIGURACIÓN DE CLOUDINARY (DISCO DURO)
+// ==========================================
+// REEMPLAZA EL VALOR CON TU CLOUD NAME
+const CLOUDINARY_CLOUD_NAME = "bnhuypdl"; 
+const CLOUDINARY_PRESET = "foliar_drive";
+const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`;
+
+// ==========================================
+// 2. LÓGICA DE USUARIOS Y RESPALDO EN LA NUBE
 // ==========================================
 let usuarioActual = null;
 
@@ -51,8 +59,70 @@ document.getElementById('btn-logout').addEventListener('click', () => {
   auth.signOut();
 });
 
-document.getElementById('btn-historial').addEventListener('click', () => {
-  alert("El panel de Foliar Drive estará disponible en el próximo paso.");
+// Función para guardar en la nube automáticamente
+async function respaldarEnFoliarDrive(blob, nombreArchivo, herramienta) {
+    if (!usuarioActual) return;
+    
+    try {
+        const formData = new FormData();
+        formData.append("file", blob);
+        formData.append("upload_preset", CLOUDINARY_PRESET);
+        
+        const res = await fetch(CLOUDINARY_URL, { method: "POST", body: formData });
+        const data = await res.json();
+        
+        if (!data.secure_url) throw new Error("Fallo al obtener enlace seguro");
+
+        await db.collection("usuarios").doc(usuarioActual.uid).collection("archivos").add({
+            nombre: nombreArchivo,
+            herramienta: herramienta,
+            url: data.secure_url,
+            fecha: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        console.log("Archivo respaldado en Foliar Drive exitosamente.");
+    } catch (error) {
+        console.error("Error en respaldo en la nube:", error);
+    }
+}
+
+// Botón de mis archivos (Carga desde base de datos)
+document.getElementById('btn-historial').addEventListener('click', async () => {
+    if (!usuarioActual) return;
+    const modal = document.getElementById('modal-drive');
+    const lista = document.getElementById('lista-archivos');
+    modal.style.display = 'flex';
+    lista.innerHTML = '<p style="text-align: center; color: var(--texto-secundario);"><i class="fa-solid fa-spinner fa-spin"></i> Sincronizando con Foliar Drive...</p>';
+    
+    try {
+        const snapshot = await db.collection("usuarios").doc(usuarioActual.uid).collection("archivos").orderBy("fecha", "desc").get();
+        if (snapshot.empty) {
+            lista.innerHTML = '<p style="text-align: center; color: var(--texto-secundario);">Tu disco está vacío. ¡Procesa tu primer PDF!</p>';
+            return;
+        }
+        
+        lista.innerHTML = '';
+        snapshot.forEach(doc => {
+            const archivo = doc.data();
+            const fecha = archivo.fecha ? archivo.fecha.toDate().toLocaleDateString() : 'Reciente';
+            
+            lista.innerHTML += `
+                <div style="background: var(--bg-principal); padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--borde);">
+                    <div>
+                        <h4 style="margin: 0; color: var(--texto-principal); font-size: 1rem;">${archivo.nombre}</h4>
+                        <p style="margin: 5px 0 0; font-size: 0.85rem; color: var(--texto-secundario);">
+                            <span style="background: var(--color-foco); color: white; padding: 2px 8px; border-radius: 10px; margin-right: 10px;">${archivo.herramienta}</span> 
+                            ${fecha}
+                        </p>
+                    </div>
+                    <a href="${archivo.url}" target="_blank" download class="btn-secundario" style="margin: 0; text-decoration: none;"><i class="fa-solid fa-download"></i> Ver / Bajar</a>
+                </div>
+            `;
+        });
+    } catch (error) {
+        lista.innerHTML = '<p style="text-align: center; color: var(--color-ilovepdf);">Aún no tienes los permisos configurados en la base de datos de Firebase.</p>';
+        console.error(error);
+    }
 });
 
 
@@ -167,7 +237,7 @@ function generarNombre(nombreOriginal, sufijo, extension = '.pdf') {
 // 4. LÓGICA DE HERRAMIENTAS
 // ==========================================
 
-// ---------- 1. Unir PDF ----------
+// ---------- 1. Unir PDF (Respaldo en Nube Activado) ----------
 document.getElementById('botonUnir').addEventListener('click', async () => {
   try {
     const files = document.getElementById('archivosUnir').files;
@@ -181,7 +251,18 @@ document.getElementById('botonUnir').addEventListener('click', async () => {
       const paginas = await pdfFinal.copyPages(pdfOrigen, pdfOrigen.getPageIndices());
       paginas.forEach(pagina => pdfFinal.addPage(pagina));
     }
-    descargar(await pdfFinal.save(), generarNombre(files[0].name, 'unido'));
+    
+    // Generar archivo final y nombre
+    const bytesFinales = await pdfFinal.save();
+    const nombreDescarga = generarNombre(files[0].name, 'unido');
+    
+    // Descargar en el navegador
+    descargar(bytesFinales, nombreDescarga);
+    
+    // Respaldo automático en la nube (Foliar Drive)
+    const blobFinal = new Blob([bytesFinales], { type: 'application/pdf' });
+    respaldarEnFoliarDrive(blobFinal, nombreDescarga, "Unir PDF");
+    
   } catch (e) { manejarErrorControlado(e); }
 });
 
@@ -214,7 +295,11 @@ document.getElementById('botonDividir').addEventListener('click', async () => {
       const pdfFinal = await PDFLib.PDFDocument.create();
       const paginas = await pdfFinal.copyPages(pdfOrigen, indices);
       paginas.forEach(p => pdfFinal.addPage(p));
-      descargar(await pdfFinal.save(), generarNombre(files[0].name, 'extraido'));
+      
+      const bytesFinales = await pdfFinal.save();
+      const nombreDescarga = generarNombre(files[0].name, 'extraido');
+      descargar(bytesFinales, nombreDescarga);
+      respaldarEnFoliarDrive(new Blob([bytesFinales], { type: 'application/pdf' }), nombreDescarga, "Dividir PDF");
     }
   } catch (e) { manejarErrorControlado(e); }
 });
@@ -289,7 +374,10 @@ document.getElementById('botonEliminar').addEventListener('click', async () => {
     const paginas = await pdfFinal.copyPages(pdfOrigen, indicesAConservar);
     paginas.forEach(p => pdfFinal.addPage(p));
     
-    descargar(await pdfFinal.save(), generarNombre(archivoActualEliminar.name, 'limpio'));
+    const bytesFinales = await pdfFinal.save();
+    const nombreDescarga = generarNombre(archivoActualEliminar.name, 'limpio');
+    descargar(bytesFinales, nombreDescarga);
+    respaldarEnFoliarDrive(new Blob([bytesFinales], { type: 'application/pdf' }), nombreDescarga, "Eliminar Páginas");
   } catch (e) { manejarErrorControlado(e); }
 });
 
@@ -364,7 +452,11 @@ document.getElementById('botonOrdenar').addEventListener('click', async () => {
     const pdfFinal = await PDFLib.PDFDocument.create();
     const paginas = await pdfFinal.copyPages(pdfOrigen, ordenPaginasArray);
     paginas.forEach(p => pdfFinal.addPage(p));
-    descargar(await pdfFinal.save(), generarNombre(archivoActualOrdenar.name, 'reordenado'));
+    
+    const bytesFinales = await pdfFinal.save();
+    const nombreDescarga = generarNombre(archivoActualOrdenar.name, 'reordenado');
+    descargar(bytesFinales, nombreDescarga);
+    respaldarEnFoliarDrive(new Blob([bytesFinales], { type: 'application/pdf' }), nombreDescarga, "Ordenar PDF");
   } catch (e) { manejarErrorControlado(e); }
 });
 
@@ -395,7 +487,11 @@ document.getElementById('botonComprimir').addEventListener('click', async () => 
       const paginaFinal = pdfFinal.addPage([viewport.width, viewport.height]);
       paginaFinal.drawImage(imagen, { x: 0, y: 0, width: viewport.width, height: viewport.height });
     }
-    descargar(await pdfFinal.save(), generarNombre(files[0].name, 'comprimido'));
+    
+    const bytesFinales = await pdfFinal.save();
+    const nombreDescarga = generarNombre(files[0].name, 'comprimido');
+    descargar(bytesFinales, nombreDescarga);
+    respaldarEnFoliarDrive(new Blob([bytesFinales], { type: 'application/pdf' }), nombreDescarga, "Comprimir PDF");
   } catch (e) { manejarErrorControlado(e); }
 });
 
@@ -413,7 +509,11 @@ document.getElementById('botonImagen').addEventListener('click', async () => {
       const pagina = pdf.addPage([imagen.width, imagen.height]);
       pagina.drawImage(imagen, { x: 0, y: 0, width: imagen.width, height: imagen.height });
     }
-    descargar(await pdf.save(), generarNombre(files[0].name, 'convertido'));
+    
+    const bytesFinales = await pdf.save();
+    const nombreDescarga = generarNombre(files[0].name, 'convertido');
+    descargar(bytesFinales, nombreDescarga);
+    respaldarEnFoliarDrive(new Blob([bytesFinales], { type: 'application/pdf' }), nombreDescarga, "JPG a PDF");
   } catch (e) { manejarErrorControlado(e); }
 });
 
@@ -520,7 +620,11 @@ document.getElementById('botonRotar').addEventListener('click', async () => {
       const anguloActual = pagina.getRotation().angle;
       pagina.setRotation(PDFLib.degrees(anguloActual + 90));
     });
-    descargar(await pdf.save(), generarNombre(files[0].name, 'rotado'));
+    
+    const bytesFinales = await pdf.save();
+    const nombreDescarga = generarNombre(files[0].name, 'rotado');
+    descargar(bytesFinales, nombreDescarga);
+    respaldarEnFoliarDrive(new Blob([bytesFinales], { type: 'application/pdf' }), nombreDescarga, "Rotar PDF");
   } catch (e) { manejarErrorControlado(e); }
 });
 
@@ -544,7 +648,11 @@ document.getElementById('botonMarca').addEventListener('click', async () => {
         color: PDFLib.rgb(0.7, 0.1, 0.1), opacity: 0.25, rotate: PDFLib.degrees(45),
       });
     });
-    descargar(await pdf.save(), generarNombre(files[0].name, 'protegido'));
+    
+    const bytesFinales = await pdf.save();
+    const nombreDescarga = generarNombre(files[0].name, 'protegido');
+    descargar(bytesFinales, nombreDescarga);
+    respaldarEnFoliarDrive(new Blob([bytesFinales], { type: 'application/pdf' }), nombreDescarga, "Marca de Agua");
   } catch (e) { manejarErrorControlado(e); }
 });
 
@@ -564,7 +672,11 @@ document.getElementById('botonNumeros').addEventListener('click', async () => {
         x: width / 2 - anchoTexto / 2, y: 20, size: 10, font: fuente, color: PDFLib.rgb(0.1, 0.1, 0.1),
       });
     });
-    descargar(await pdf.save(), generarNombre(files[0].name, 'numerado'));
+    
+    const bytesFinales = await pdf.save();
+    const nombreDescarga = generarNombre(files[0].name, 'numerado');
+    descargar(bytesFinales, nombreDescarga);
+    respaldarEnFoliarDrive(new Blob([bytesFinales], { type: 'application/pdf' }), nombreDescarga, "Numerar Páginas");
   } catch (e) { manejarErrorControlado(e); }
 });
 
@@ -584,6 +696,10 @@ document.getElementById('botonRecortar').addEventListener('click', async () => {
       const { width, height } = pagina.getSize();
       pagina.setCropBox(width * margen, height * margen, width * (1 - margen * 2), height * (1 - margen * 2));
     });
-    descargar(await pdf.save(), generarNombre(files[0].name, 'recortado'));
+    
+    const bytesFinales = await pdf.save();
+    const nombreDescarga = generarNombre(files[0].name, 'recortado');
+    descargar(bytesFinales, nombreDescarga);
+    respaldarEnFoliarDrive(new Blob([bytesFinales], { type: 'application/pdf' }), nombreDescarga, "Recortar PDF");
   } catch (e) { manejarErrorControlado(e); }
 });
