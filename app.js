@@ -86,13 +86,59 @@ async function respaldarEnFoliarDrive(blob, nombreArchivo, herramienta) {
     }
 }
 
-// Botón de mis archivos (Carga desde base de datos)
-document.getElementById('btn-historial').addEventListener('click', async () => {
+// ==========================================
+// ESCUCHA EN TIEMPO REAL DEL HISTORIAL
+// ==========================================
+let oyenteHistorial = null; // Variable para controlar la conexión en vivo
+
+document.getElementById('btn-historial').addEventListener('click', () => {
     if (!usuarioActual) return;
     const modal = document.getElementById('modal-drive');
     const lista = document.getElementById('lista-archivos');
     modal.style.display = 'flex';
-    lista.innerHTML = '<p style="text-align: center; color: var(--texto-secundario);"><i class="fa-solid fa-spinner fa-spin"></i> Sincronizando con Foliar Drive...</p>';
+    lista.innerHTML = '<p style="text-align: center; color: var(--texto-secundario);"><i class="fa-solid fa-spinner fa-spin"></i> Sincronizando en vivo...</p>';
+    
+    // Si ya estábamos escuchando, cancelamos la conexión vieja
+    if (oyenteHistorial) oyenteHistorial(); 
+    
+    // onSnapshot: Mantiene una conexión ABIERTA. Si un archivo llega, la lista se actualiza sola al instante.
+    oyenteHistorial = db.collection("usuarios")
+      .doc(usuarioActual.uid)
+      .collection("archivos")
+      .orderBy("fecha", "desc")
+      .onSnapshot((snapshot) => {
+        if (snapshot.empty) {
+            lista.innerHTML = '<p style="text-align: center; color: var(--texto-secundario);">Tu disco está vacío. ¡Procesa tu primer PDF!</p>';
+            return;
+        }
+        
+        lista.innerHTML = ''; // Limpiamos la lista para dibujar la nueva versión
+        snapshot.forEach(doc => {
+            const archivo = doc.data();
+            const fecha = archivo.fecha ? archivo.fecha.toDate().toLocaleDateString() : 'Reciente';
+            
+            // Inyectamos el nombre para que Cloudinary no se confunda (La corrección que hicimos antes)
+            const nombreSinExtension = archivo.nombre.replace(/\.[^/.]+$/, "");
+            const urlDescarga = archivo.url.replace('/upload/', '/upload/fl_attachment:' + encodeURIComponent(nombreSinExtension) + '/');
+            
+            lista.innerHTML += `
+                <div style="background: var(--bg-principal); padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--borde); margin-bottom: 10px;">
+                    <div>
+                        <h4 style="margin: 0; color: var(--texto-principal); font-size: 1rem;">${archivo.nombre}</h4>
+                        <p style="margin: 5px 0 0; font-size: 0.85rem; color: var(--texto-secundario);">
+                            <span style="background: var(--color-foco); color: white; padding: 2px 8px; border-radius: 10px; margin-right: 10px;">${archivo.herramienta}</span> 
+                            ${fecha}
+                        </p>
+                    </div>
+                    <a href="${urlDescarga}" class="btn-secundario" style="margin: 0; text-decoration: none;"><i class="fa-solid fa-download"></i> Descargar</a>
+                </div>
+            `;
+        });
+    }, (error) => {
+        lista.innerHTML = '<p style="text-align: center; color: var(--color-ilovepdf);">Aún no tienes los permisos configurados en Firebase.</p>';
+        console.error("Error en tiempo real:", error);
+    });
+});
     
     try {
         const snapshot = await db.collection("usuarios").doc(usuarioActual.uid).collection("archivos").orderBy("fecha", "desc").get();
