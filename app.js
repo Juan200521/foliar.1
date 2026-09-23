@@ -66,7 +66,7 @@ function vigilarInactividad() {
   let temporizador;
   const TIEMPO_LIMITE_MS = 15 * 60 * 1000; // 15 minutos en milisegundos
 
-  function cerrarSesionPorInactividad() {
+ function cerrarSesionPorInactividad() {
     if (usuarioActual) {
       auth.signOut().then(() => {
         alert("🔒 Tu sesión se ha cerrado automáticamente por inactividad.");
