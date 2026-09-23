@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://upload.wikimedia.org; worker-src 'self' blob: https://cdnjs.cloudflare.com; connect-src 'self' data: blob: https://cdnjs.cloudflare.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com;">
+    
+    <!-- Política de Seguridad de Contenido (CSP) Optimizada para Firebase -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.firebaseapp.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://upload.wikimedia.org https://*.googleusercontent.com; worker-src 'self' blob: https://cdnjs.cloudflare.com; connect-src 'self' data: blob: https://cdnjs.cloudflare.com https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://*.google.com;">
     
     <title>Foliar - Herramientas PDF</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg?v=1.0">
@@ -290,7 +292,7 @@
         </div>
     </div>
 
-    <!-- Archivo JS (Versión 2.3) -->
-    <script src="app.js?v=2.3" defer></script>
+    <!-- Archivo JS (Versión 2.4) -->
+    <script src="app.js?v=2.4" defer></script>
 </body>
 </html>
