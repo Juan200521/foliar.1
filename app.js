@@ -1,19 +1,72 @@
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+// ==========================================
+// 1. CONFIGURACIÓN DE FIREBASE (SEGURIDAD)
+// ==========================================
+// REEMPLAZA LOS VALORES DENTRO DE LAS COMILLAS CON TUS LLAVES DE FIREBASE
+const firebaseConfig = {
+  apiKey: "AIzaSyDHoRCZZ25LR06O06IF8OwMh-q_az15lkQ",
+  authDomain: "foliar-7358a.firebaseapp.com",
+  projectId: "foliar-7358a",
+  storageBucket: "foliar-7358a.firebasestorage.app",
+  messagingSenderId: "663236664000",
+  appId: "1:663236664000:web:5348752418a6a8dff42b25",
+  measurementId: "G-ABCDEFG123"
+};
+
+// Inicializar Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
 // ==========================================
-// MÓDULO DE SEGURIDAD Y VALIDACIÓN (HARDENING)
+// 2. LÓGICA DE USUARIOS (LOGIN CON GOOGLE)
 // ==========================================
-const MAX_FILE_SIZE = 150 * 1024 * 1024; // Límite de 150 MB para evitar Crash en RAM
+let usuarioActual = null;
+
+auth.onAuthStateChanged(user => {
+  const btnLogin = document.getElementById('btn-login');
+  const infoUsuario = document.getElementById('info-usuario');
+  const nombreUsuario = document.getElementById('nombre-usuario');
+
+  if (user) {
+    usuarioActual = user;
+    btnLogin.style.display = 'none';
+    infoUsuario.style.display = 'flex';
+    nombreUsuario.textContent = `Hola, ${user.displayName.split(' ')[0]}`;
+  } else {
+    usuarioActual = null;
+    btnLogin.style.display = 'inline-block';
+    infoUsuario.style.display = 'none';
+  }
+});
+
+document.getElementById('btn-login').addEventListener('click', () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).catch(error => {
+    console.error("Error al iniciar sesión:", error);
+    alert("No se pudo iniciar sesión con Google.");
+  });
+});
+
+document.getElementById('btn-logout').addEventListener('click', () => {
+  auth.signOut();
+});
+
+document.getElementById('btn-historial').addEventListener('click', () => {
+  alert("El panel de Foliar Drive estará disponible en el próximo paso.");
+});
+
+
+// ==========================================
+// 3. MÓDULO DE SEGURIDAD Y VALIDACIÓN
+// ==========================================
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const MAX_FILE_SIZE = 150 * 1024 * 1024; 
 
 function validarArchivoSeguro(archivo, mimePermitidos) {
     if (!archivo) throw new Error("No se ha seleccionado ningún archivo.");
-    
-    // Validación de MIME Type (Evita subir un .exe renombrado a .pdf)
     if (!mimePermitidos.includes(archivo.type)) {
         throw new Error(`Por seguridad, solo se permiten archivos de tipo: ${mimePermitidos.join(', ')}.`);
     }
-    
-    // Prevención de Denegación de Servicio local (DDoS en RAM)
     if (archivo.size > MAX_FILE_SIZE) {
         throw new Error("El archivo excede el tamaño máximo seguro permitido (150 MB).");
     }
@@ -21,7 +74,6 @@ function validarArchivoSeguro(archivo, mimePermitidos) {
 }
 
 function escaparHTML(texto) {
-    // Prevención de inyección XSS (Cross-Site Scripting)
     if (!texto) return '';
     const div = document.createElement('div');
     div.textContent = texto;
@@ -29,12 +81,10 @@ function escaparHTML(texto) {
 }
 
 function limpiarRangoPaginas(texto) {
-    // Solo permite números, comas y guiones (Evita inyección de comandos lógicos)
     return texto.replace(/[^0-9,\-]/g, '');
 }
 
 function manejarErrorControlado(e, botonId, textoBotonOriginal) {
-    // Control de logs: No expone objetos del documento en consola.
     console.warn("Seguridad/Error controlado:", e.message || "Fallo en operación de memoria");
     alert(e.message || 'Error de procesamiento. Verifica que el documento no esté corrupto o encriptado.');
     if (botonId) {
@@ -70,7 +120,7 @@ document.querySelectorAll('input[type="file"]').forEach(input => {
     const label = this.previousElementSibling;
     if (label && label.classList.contains('btn-gigante')) {
       if (this.files && this.files.length > 1) label.textContent = this.files.length + ' archivos listos';
-      else if (this.files && this.files.length === 1) label.textContent = escaparHTML(this.files[0].name); // XSS Shield
+      else if (this.files && this.files.length === 1) label.textContent = escaparHTML(this.files[0].name);
       else label.textContent = 'Elegir archivo/s';
     }
   });
@@ -85,7 +135,6 @@ function descargarBlob(blob, nombre) {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  // Seguridad y RAM: Liberamos el objeto de memoria después de usarlo
   setTimeout(() => URL.revokeObjectURL(url), 1000); 
 }
 
@@ -115,7 +164,7 @@ function generarNombre(nombreOriginal, sufijo, extension = '.pdf') {
 }
 
 // ==========================================
-// LÓGICA DE HERRAMIENTAS
+// 4. LÓGICA DE HERRAMIENTAS
 // ==========================================
 
 // ---------- 1. Unir PDF ----------
@@ -123,7 +172,6 @@ document.getElementById('botonUnir').addEventListener('click', async () => {
   try {
     const files = document.getElementById('archivosUnir').files;
     if (files.length < 2) throw new Error('Elige al menos 2 archivos PDF.');
-    
     for (const f of files) validarArchivoSeguro(f, ['application/pdf']);
 
     const pdfFinal = await PDFLib.PDFDocument.create();
@@ -326,8 +374,6 @@ document.getElementById('botonComprimir').addEventListener('click', async () => 
   try {
     const files = document.getElementById('archivoComprimir').files;
     validarArchivoSeguro(files[0], ['application/pdf']);
-    
-    // Validación de entrada numérica
     let calidad = parseInt(document.getElementById('calidadComprimir').value, 10);
     if(isNaN(calidad) || calidad < 1 || calidad > 100) calidad = 70;
     calidad = calidad / 100;
@@ -358,7 +404,6 @@ document.getElementById('botonImagen').addEventListener('click', async () => {
   try {
     const files = document.getElementById('archivosImagen').files;
     if (files.length < 1) throw new Error('Selecciona al menos una imagen.');
-    
     const pdf = await PDFLib.PDFDocument.create();
     for (const archivo of files) {
       validarArchivoSeguro(archivo, ['image/png', 'image/jpeg']);
@@ -377,7 +422,6 @@ document.getElementById('botonPdf2Jpg').addEventListener('click', async () => {
   try {
     const files = document.getElementById('archivoPdf2Jpg').files;
     validarArchivoSeguro(files[0], ['application/pdf']);
-    
     const bytes = await files[0].arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
     const zip = new JSZip();
@@ -399,14 +443,13 @@ document.getElementById('botonPdf2Jpg').addEventListener('click', async () => {
   } catch (e) { manejarErrorControlado(e); }
 });
 
-// ---------- 12. PDF a Word (Texto Seguro - Anti XSS) ----------
+// ---------- 12. PDF a Word ----------
 document.getElementById('botonPdf2Word').addEventListener('click', async () => {
   const btnId = 'botonPdf2Word';
   const textoOriginal = document.getElementById(btnId).innerHTML;
   try {
     const files = document.getElementById('archivoPdf2Word').files;
     validarArchivoSeguro(files[0], ['application/pdf']);
-    
     document.getElementById(btnId).textContent = 'Procesando bloque de texto...';
     document.getElementById(btnId).disabled = true;
 
@@ -418,12 +461,9 @@ document.getElementById('botonPdf2Word').addEventListener('click', async () => {
       const pagina = await pdf.getPage(n);
       const contenido = await pagina.getTextContent();
       const textoRaw = contenido.items.map(item => item.str).join(' ');
-      
-      // VITAL: Sanitizar texto extraído por si el PDF es malicioso y contiene <script>
       const textoSeguro = escaparHTML(textoRaw);
       textoCompletoHTML += `<p>${textoSeguro}</p><br/>`;
     }
-
     const htmlContent = `
       <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
       <head><meta charset='utf-8'><title>Doc Seguro</title></head>
@@ -438,40 +478,32 @@ document.getElementById('botonPdf2Word').addEventListener('click', async () => {
   } catch (e) { manejarErrorControlado(e, btnId, textoOriginal); }
 });
 
-// ---------- 13. Word a PDF (.docx) ----------
+// ---------- 13. Word a PDF ----------
 document.getElementById('botonWord2Pdf').addEventListener('click', async () => {
   const btnId = 'botonWord2Pdf';
   const textoOriginal = document.getElementById(btnId).innerHTML;
   try {
     const files = document.getElementById('archivoWord2Pdf').files;
-    // Microsoft usa un MIME extenso para DOCX, validamos estrictamente
     validarArchivoSeguro(files[0], ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword']);
-
     document.getElementById(btnId).textContent = 'Convirtiendo formato seguro...';
     document.getElementById(btnId).disabled = true;
 
     const arrayBuffer = await files[0].arrayBuffer();
     const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
-    const htmlContenido = result.value;
-
     const contenedorTemporal = document.createElement('div');
-    // Mammoth ya genera HTML seguro por defecto escapando elementos no estándares
-    contenedorTemporal.innerHTML = htmlContenido;
+    contenedorTemporal.innerHTML = result.value;
     contenedorTemporal.style.padding = '30px';
     contenedorTemporal.style.fontFamily = 'Helvetica, Arial, sans-serif';
     contenedorTemporal.style.fontSize = '14px';
     contenedorTemporal.style.color = '#000';
 
     const opcionesPDF = {
-      margin: 15,
-      filename: generarNombre(files[0].name, 'oficial', '.pdf'),
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
+      margin: 15, filename: generarNombre(files[0].name, 'oficial', '.pdf'),
+      image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
     await html2pdf().set(opcionesPDF).from(contenedorTemporal).save();
-
     document.getElementById(btnId).innerHTML = textoOriginal;
     document.getElementById(btnId).disabled = false;
   } catch (e) { manejarErrorControlado(e, btnId, textoOriginal); }
@@ -492,13 +524,11 @@ document.getElementById('botonRotar').addEventListener('click', async () => {
   } catch (e) { manejarErrorControlado(e); }
 });
 
-// ---------- 9. Marca de agua (Sanitizada) ----------
+// ---------- 9. Marca de agua ----------
 document.getElementById('botonMarca').addEventListener('click', async () => {
   try {
     const files = document.getElementById('archivoMarca').files;
     validarArchivoSeguro(files[0], ['application/pdf']);
-    
-    // Inyección XSS evitada: Escapamos el texto que ingresó el usuario
     const textoSeguro = escaparHTML(document.getElementById('textoMarca').value || 'CONFIDENCIAL');
     
     const bytes = await files[0].arrayBuffer();
@@ -544,8 +574,6 @@ document.getElementById('botonRecortar').addEventListener('click', async () => {
   try {
     const files = document.getElementById('archivoRecortar').files;
     validarArchivoSeguro(files[0], ['application/pdf']);
-    
-    // Sanitización matemática
     let margen = parseInt(document.getElementById('margenRecortar').value, 10);
     if(isNaN(margen) || margen < 0 || margen > 40) margen = 10;
     margen = margen / 100;

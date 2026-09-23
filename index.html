@@ -3,29 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Política de Seguridad de Contenido (CSP) para prevenir XSS -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob:; worker-src 'self' blob: https://cdnjs.cloudflare.com; connect-src 'self' data: blob: https://cdnjs.cloudflare.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://upload.wikimedia.org; worker-src 'self' blob: https://cdnjs.cloudflare.com; connect-src 'self' data: blob: https://cdnjs.cloudflare.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com;">
     
     <title>Foliar - Herramientas PDF</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg?v=1.0">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- CSS (Versión 2.1) -->
     <link rel="stylesheet" href="style.css?v=2.1">
     
+    <!-- Librerías de Procesamiento PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <!-- Librerías de Firebase (Compatibilidad global) -->
+    <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
     <div class="fondo-animado"></div>
     
     <div class="cabecera">
         <h1><i class="fa-solid fa-layer-group"></i> Foliar</h1>
-        <p>Procesamiento 100% en tu navegador. Rápido, seguro y privado.</p>
+        <p>Herramientas PDF profesionales con respaldo automático en la nube.</p>
+        
+        <!-- Panel de Usuario Firebase -->
+        <div id="panel-usuario" style="margin-top: 20px;">
+            <button id="btn-login" class="btn-secundario" style="background: white; color: black; border-radius: 50px; font-weight: 600;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18" style="vertical-align: middle; margin-right: 8px;"> 
+                Iniciar sesión con Google
+            </button>
+            <div id="info-usuario" style="display: none; align-items: center; justify-content: center; gap: 15px;">
+                <span id="nombre-usuario" style="font-weight: 600; color: var(--color-foco); font-size: 1.1rem;"></span>
+                <button id="btn-historial" class="btn-secundario" style="margin: 0; padding: 6px 18px; border-radius: 50px;"><i class="fa-solid fa-cloud"></i> Mis Archivos</button>
+                <button id="btn-logout" class="btn-secundario" style="margin: 0; padding: 6px 18px; border-radius: 50px; border-color: var(--color-ilovepdf); color: var(--color-ilovepdf);"><i class="fa-solid fa-right-from-bracket"></i> Salir</button>
+            </div>
+        </div>
     </div>
     
     <div class="contenedor-principal">
@@ -273,7 +290,7 @@
         </div>
     </div>
 
-    <!-- Archivo JS (Versión 2.1) -->
-    <script src="app.js?v=2.1" defer></script>
+    <!-- Archivo JS (Versión 2.2) -->
+    <script src="app.js?v=2.2" defer></script>
 </body>
 </html>
