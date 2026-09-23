@@ -178,42 +178,7 @@ document.getElementById('btn-historial').addEventListener('click', () => {
     });
 });
     
-    try {
-        const snapshot = await db.collection("usuarios").doc(usuarioActual.uid).collection("archivos").orderBy("fecha", "desc").get();
-        if (snapshot.empty) {
-            lista.innerHTML = '<p style="text-align: center; color: var(--texto-secundario);">Tu disco está vacío. ¡Procesa tu primer PDF!</p>';
-            return;
-        }
-        
-        lista.innerHTML = '';
-        snapshot.forEach(doc => {
-            const archivo = doc.data();
-            const fecha = archivo.fecha ? archivo.fecha.toDate().toLocaleDateString() : 'Reciente';
-            
-           // Corregido: Le quitamos la extensión al nombre para que Cloudinary no se confunda
-            const nombreSinExtension = archivo.nombre.replace(/\.[^/.]+$/, "");
-            const urlDescarga = archivo.url.replace('/upload/', '/upload/fl_attachment:' + encodeURIComponent(nombreSinExtension) + '/');
-            
-            lista.innerHTML += `
-                <div style="background: var(--bg-principal); padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--borde);">
-                    <div>
-                        <h4 style="margin: 0; color: var(--texto-principal); font-size: 1rem;">${archivo.nombre}</h4>
-                        <p style="margin: 5px 0 0; font-size: 0.85rem; color: var(--texto-secundario);">
-                            <span style="background: var(--color-foco); color: white; padding: 2px 8px; border-radius: 10px; margin-right: 10px;">${archivo.herramienta}</span> 
-                            ${fecha}
-                        </p>
-                    </div>
-                    <a href="${urlDescarga}" class="btn-secundario" style="margin: 0; text-decoration: none;"><i class="fa-solid fa-download"></i> Descargar</a>
-                </div>
-            `;
-        });
-    } catch (error) {
-        lista.innerHTML = '<p style="text-align: center; color: var(--color-ilovepdf);">Aún no tienes los permisos configurados en la base de datos de Firebase.</p>';
-        console.error(error);
-    }
-});
-
-
+   
 // ==========================================
 // 3. MÓDULO DE SEGURIDAD Y VALIDACIÓN
 // ==========================================
