@@ -59,16 +59,16 @@ document.getElementById('btn-login').addEventListener('click', () => {
 
 document.getElementById('btn-logout').addEventListener('click', () => {
   auth.signOut();
-});
+}); // <- Verifica que estos tres caracteres estén presente
 
 // ==========================================
 // SEGURIDAD: CIERRE DE SESIÓN POR INACTIVIDAD
 // ==========================================
 function vigilarInactividad() {
   let temporizador;
-  const TIEMPO_LIMITE_MS = 15 * 60 * 1000; // 15 minutos en milisegundos
+  const TIEMPO_LIMITE_MS = 15 * 60 * 1000; // 15 minutos
 
- function cerrarSesionPorInactividad() {
+  function cerrarSesionPorInactividad() {
     if (usuarioActual) {
       auth.signOut().then(() => {
         alert("🔒 Tu sesión se ha cerrado automáticamente por inactividad.");
@@ -83,7 +83,7 @@ function vigilarInactividad() {
     }
   }
 
-  // Detectar actividad del usuario en pantalla
+  // Detectar actividad
   const eventosActividad = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
   eventosActividad.forEach(evento => {
     window.addEventListener(evento, reiniciarContador, { passive: true });
@@ -91,6 +91,8 @@ function vigilarInactividad() {
 
   reiniciarContador();
 }
+
+vigilarInactividad();
 
 // Iniciar monitoreo
 vigilarInactividad();
