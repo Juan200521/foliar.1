@@ -59,6 +59,40 @@ document.getElementById('btn-logout').addEventListener('click', () => {
   auth.signOut();
 });
 
+// ==========================================
+// SEGURIDAD: CIERRE DE SESIÓN POR INACTIVIDAD
+// ==========================================
+function vigilarInactividad() {
+  let temporizador;
+  const TIEMPO_LIMITE_MS = 15 * 60 * 1000; // 15 minutos en milisegundos
+
+  function cerrarSesionPorInactividad() {
+    if (usuarioActual) {
+      auth.signOut().then(() => {
+        alert("🔒 Tu sesión se ha cerrado automáticamente por inactividad.");
+      }).catch(err => console.error("Error cerrando sesión:", err));
+    }
+  }
+
+  function reiniciarContador() {
+    clearTimeout(temporizador);
+    if (usuarioActual) {
+      temporizador = setTimeout(cerrarSesionPorInactividad, TIEMPO_LIMITE_MS);
+    }
+  }
+
+  // Detectar actividad del usuario en pantalla
+  const eventosActividad = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
+  eventosActividad.forEach(evento => {
+    window.addEventListener(evento, reiniciarContador, { passive: true });
+  });
+
+  reiniciarContador();
+}
+
+// Iniciar monitoreo
+vigilarInactividad();
+
 // Función para guardar en la nube automáticamente
 async function respaldarEnFoliarDrive(blob, nombreArchivo, herramienta) {
     if (!usuarioActual) return;
