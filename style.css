@@ -413,175 +413,240 @@ input[type="range"] {
 ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+
 /* ==========================================
-   ESTILOS PANTALLA DE LOGIN
+   ESTILOS PANTALLA DE LOGIN (CORREGIDO Y ANIMADO)
    ========================================== */
+
+/* Aseguramos que las variables de color existan para el login */
+:root {
+    --login-bg: #130f23;
+    --login-card: #1f1a30;
+    --login-acento: #7a5cff;
+    --login-texto: #ffffff;
+    --login-texto-sec: #a8a0c0;
+}
 
 .login-body {
     margin: 0;
     padding: 0;
     min-height: 100vh;
-    background-color: var(--bg-principal);
+    background-color: var(--login-bg);
     display: flex;
     justify-content: center;
     align-items: center;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    /* Patrón sutil de fondo para más elegancia */
+    background-image: radial-gradient(circle at 50% 0%, #2a2345 0%, transparent 70%);
 }
 
 .login-layout {
     display: flex;
     width: 90%;
-    max-width: 1000px;
-    background-color: var(--bg-secundario);
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    overflow: hidden; /* Para que las esquinas redondeadas recorten el contenido */
+    max-width: 1050px;
+    background-color: var(--login-card);
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+    /* Animación de entrada suave */
+    animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+    transform: translateY(30px);
 }
 
-/* --- Panel Izquierdo --- */
+@keyframes fadeUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- Panel Izquierdo: Informativo --- */
 .login-info-panel {
-    flex: 1;
-    padding: 50px 40px;
-    background: linear-gradient(135deg, var(--bg-secundario), #1f1a30);
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    flex: 1.2;
+    padding: 60px 50px;
+    background: linear-gradient(145deg, #241e38, #1a1528);
+    border-right: 1px solid rgba(255, 255, 255, 0.03);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .login-info-panel .logo-enlace {
     text-decoration: none;
+    margin-bottom: 20px;
+}
+
+.login-info-panel .logo-text {
+    color: var(--login-texto);
+    font-size: 2.5rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
 .login-info-panel h2 {
-    color: var(--texto-principal);
+    color: var(--login-texto);
     font-size: 1.8rem;
-    margin-top: 30px;
+    font-weight: 700;
     margin-bottom: 15px;
+    line-height: 1.2;
 }
 
 .login-description {
-    color: var(--texto-secundario);
-    line-height: 1.6;
-    margin-bottom: 30px;
+    color: var(--login-texto-sec);
+    line-height: 1.7;
+    font-size: 1.05rem;
+    margin-bottom: 40px;
 }
 
 .login-features {
     list-style: none;
     padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
 }
 
 .login-features li {
-    color: var(--texto-principal);
-    margin-bottom: 20px;
+    color: var(--login-texto-sec);
     display: flex;
     align-items: flex-start;
-    gap: 15px;
+    gap: 20px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    transition: transform 0.3s ease;
+}
+
+.login-features li:hover {
+    transform: translateX(10px);
 }
 
 .login-features i {
-    color: var(--color-foco);
-    font-size: 1.2rem;
-    margin-top: 4px;
+    color: var(--login-acento);
+    font-size: 1.4rem;
+    background: rgba(122, 92, 255, 0.1);
+    padding: 12px;
+    border-radius: 12px;
 }
 
 .login-features strong {
-    color: var(--color-foco);
+    color: var(--login-texto);
     display: block;
-    margin-bottom: 4px;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
 }
 
-/* --- Panel Derecho --- */
+/* --- Panel Derecho: Formulario de Acción --- */
 .login-action-panel {
     flex: 1;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 50px;
-    background-color: var(--bg-principal);
+    padding: 60px 40px;
+    background-color: var(--login-card);
 }
 
 .login-card {
     width: 100%;
-    max-width: 350px;
+    max-width: 380px;
     text-align: center;
 }
 
 .login-card h2 {
-    color: var(--texto-principal);
-    margin-bottom: 10px;
+    color: var(--login-texto);
+    font-size: 2rem;
+    margin-bottom: 15px;
+    font-weight: 700;
 }
 
 .login-card p {
-    color: var(--texto-secundario);
-    margin-bottom: 30px;
-    font-size: 0.95rem;
+    color: var(--login-texto-sec);
+    margin-bottom: 40px;
+    font-size: 1rem;
+    line-height: 1.5;
 }
 
-/* Botón de Google */
+/* Botón de Google Mejorado */
 .btn-google-login {
-    background-color: white;
-    color: #333;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-size: 1rem;
+    background-color: #ffffff;
+    color: #3c4043;
+    border: 1px solid transparent;
+    padding: 14px 24px;
+    border-radius: 50px; /* Bordes muy redondeados para elegancia */
+    font-size: 1.05rem;
     font-weight: 600;
     cursor: pointer;
     width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px;
-    transition: background-color 0.3s ease, transform 0.1s ease;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    gap: 12px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .btn-google-login:hover {
-    background-color: #f1f1f1;
+    background-color: #f8f9fa;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1);
 }
 
 .btn-google-login:active {
-    transform: scale(0.98);
+    transform: translateY(0);
 }
 
 .btn-google-login i {
-    color: #4285F4; /* Color azul clásico de Google */
-    font-size: 1.2rem;
+    color: #ea4335; /* Solo el ícono de Google resalta */
+    font-size: 1.4rem;
 }
 
 /* Footer de la tarjeta */
 .login-footer {
-    margin-top: 30px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding-top: 20px;
+    margin-top: 40px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 30px;
 }
 
 .login-footer p {
-    font-size: 0.8rem;
-    color: var(--texto-secundario);
-    margin-bottom: 15px;
+    font-size: 0.85rem;
+    color: rgba(168, 160, 192, 0.6);
+    margin-bottom: 20px;
 }
 
 .btn-volver-texto {
-    color: var(--color-foco);
+    color: var(--login-acento);
     text-decoration: none;
-    font-size: 0.9rem;
-    transition: color 0.3s ease;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    padding: 8px 16px;
+    border-radius: 20px;
 }
 
 .btn-volver-texto:hover {
-    color: #b59bff;
+    color: #ffffff;
+    background: rgba(122, 92, 255, 0.15);
+    transform: translateX(-5px);
 }
 
 /* --- Adaptabilidad (Móviles) --- */
-@media (max-width: 768px) {
+@media (max-width: 850px) {
     .login-layout {
         flex-direction: column;
+        margin: 20px;
+        border-radius: 15px;
     }
     .login-info-panel {
+        padding: 40px 30px;
         border-right: none;
         border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        padding: 40px 30px;
     }
     .login-action-panel {
         padding: 40px 30px;
