@@ -116,7 +116,7 @@ function vigilarInactividad() {
   // Detectar actividad
   const eventosActividad = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
   eventosActividad.forEach(evento => {
-    window.addEventListener(evento, reiniciarContador, { passive: true });
+    window?.addEventListener(evento, reiniciarContador, { passive: true });
   });
 
   reiniciarContador();
@@ -271,7 +271,7 @@ function volverAlMenu() {
 }
 
 document.querySelectorAll('input[type="file"]').forEach(input => {
-  input.addEventListener('change', function() {
+  input?.addEventListener('change', function() {
     const label = this.previousElementSibling;
     if (label && label.classList.contains('btn-gigante')) {
       if (this.files && this.files.length > 1) label.textContent = this.files.length + ' archivos listos';
@@ -429,7 +429,7 @@ document.getElementById('archivoEliminar')?.addEventListener('change', async (e)
       divContenedor.appendChild(canvas);
       divContenedor.appendChild(divNumero);
       
-      divContenedor.addEventListener('click', () => {
+      divContenedor?.addEventListener('click', () => {
         const indice = n - 1; 
         if (paginasParaEliminar.has(indice)) {
           paginasParaEliminar.delete(indice);
@@ -445,7 +445,7 @@ document.getElementById('archivoEliminar')?.addEventListener('change', async (e)
   } catch (e) { contenedorPrevia.innerHTML = '<p style="color:var(--color-ilovepdf);">Error de lectura de archivo</p>'; manejarErrorControlado(e); }
 });
 
-document.getElementById('botonEliminar').addEventListener('click', async () => {
+document.getElementById('botonEliminar')?.addEventListener('click', async () => {
   try {
     if (!archivoActualEliminar) return;
     if (paginasParaEliminar.size === 0) throw new Error('Marca al menos una página.');
