@@ -50,12 +50,23 @@ auth.onAuthStateChanged(user => {
 });
 
 document.getElementById('btn-login').addEventListener('click', () => {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(error => {
-    console.error("Error al iniciar sesión:", error);
-    alert("No se pudo iniciar sesión con Google.");
-  });
+    // 1. En lugar de iniciar sesión de inmediato, redirigimos al usuario a login.html
+    window.location.href = 'login.html'; 
 });
+
+// 2. Necesitamos un nuevo evento para el botón que estará DENTRO de login.html
+const btnLoginGoogle = document.getElementById('btn-login-google');
+if (btnLoginGoogle) { // Solo se ejecuta si estamos en la página de login
+    btnLoginGoogle.addEventListener('click', () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        
+        // ESTA LÍNEA OBLIGA A MOSTRAR EL SELECTOR DE CUENTAS:
+        provider.setCustomParameters({ prompt: 'select_account' }); 
+        
+        // Cambiamos a Redirección en lugar de Popup
+        auth.signInWithRedirect(provider); 
+    });
+}
 
 document.getElementById('btn-logout').addEventListener('click', () => {
   auth.signOut();

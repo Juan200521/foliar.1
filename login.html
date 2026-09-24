@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - Foliar</title>
+    <!-- Mantenemos tu hoja de estilos principal -->
+    <link rel="stylesheet" href="style.css"> 
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <!-- Iconos de FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="login-body">
+
+    <div class="login-layout">
+        
+        <!-- Panel Izquierdo: Información -->
+        <div class="login-info-panel">
+            <a href="index.html" class="logo-enlace">
+                <h1 class="logo-text"><i class="fa-solid fa-layer-group"></i> Foliar</h1>
+            </a>
+            <h2>Herramientas PDF para gente productiva</h2>
+            <p class="login-description">
+                Foliar te ayuda a gestionar tus documentos de forma rápida, segura y 100% online. Disfruta de un entorno diseñado para optimizar tu flujo de trabajo.
+            </p>
+            
+            <ul class="login-features">
+                <li><i class="fa-solid fa-link"></i> <strong>Une archivos:</strong> Combina múltiples PDF en uno solo al instante.</li>
+                <li><i class="fa-solid fa-scissors"></i> <strong>Divide documentos:</strong> Extrae las páginas exactas que necesitas.</li>
+                <li><i class="fa-solid fa-cloud-arrow-up"></i> <strong>Respaldo automático:</strong> Guarda tu progreso directamente en la nube.</li>
+            </ul>
+        </div>
+
+        <!-- Panel Derecho: Formulario -->
+        <div class="login-action-panel">
+            <div class="login-card">
+                <h2>Accede a tu cuenta</h2>
+                <p>Ingresa para empezar a gestionar tus archivos PDF de forma segura.</p>
+                
+                <button id="btn-login-google" class="btn-google-login">
+                    <i class="fa-brands fa-google"></i> Continuar con Google
+                </button>
+                
+                <div class="login-footer">
+                    <p>¿No tienes cuenta? <br> Google creará una automáticamente al iniciar sesión.</p>
+                    <a href="index.html" class="btn-volver-texto"><i class="fa-solid fa-arrow-left"></i> Volver al inicio</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Firebase SDK (Igual que en tu index) -->
+    <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Conexión a tu lógica de JS -->
+    <script src="app.js"></script>
+</body>
+</html>

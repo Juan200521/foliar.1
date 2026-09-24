@@ -413,3 +413,177 @@ input[type="range"] {
 ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+/* ==========================================
+   ESTILOS PANTALLA DE LOGIN
+   ========================================== */
+
+.login-body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background-color: var(--bg-principal);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-layout {
+    display: flex;
+    width: 90%;
+    max-width: 1000px;
+    background-color: var(--bg-secundario);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    overflow: hidden; /* Para que las esquinas redondeadas recorten el contenido */
+}
+
+/* --- Panel Izquierdo --- */
+.login-info-panel {
+    flex: 1;
+    padding: 50px 40px;
+    background: linear-gradient(135deg, var(--bg-secundario), #1f1a30);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.login-info-panel .logo-enlace {
+    text-decoration: none;
+}
+
+.login-info-panel h2 {
+    color: var(--texto-principal);
+    font-size: 1.8rem;
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
+
+.login-description {
+    color: var(--texto-secundario);
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.login-features {
+    list-style: none;
+    padding: 0;
+}
+
+.login-features li {
+    color: var(--texto-principal);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.login-features i {
+    color: var(--color-foco);
+    font-size: 1.2rem;
+    margin-top: 4px;
+}
+
+.login-features strong {
+    color: var(--color-foco);
+    display: block;
+    margin-bottom: 4px;
+}
+
+/* --- Panel Derecho --- */
+.login-action-panel {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 50px;
+    background-color: var(--bg-principal);
+}
+
+.login-card {
+    width: 100%;
+    max-width: 350px;
+    text-align: center;
+}
+
+.login-card h2 {
+    color: var(--texto-principal);
+    margin-bottom: 10px;
+}
+
+.login-card p {
+    color: var(--texto-secundario);
+    margin-bottom: 30px;
+    font-size: 0.95rem;
+}
+
+/* Botón de Google */
+.btn-google-login {
+    background-color: white;
+    color: #333;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-google-login:hover {
+    background-color: #f1f1f1;
+}
+
+.btn-google-login:active {
+    transform: scale(0.98);
+}
+
+.btn-google-login i {
+    color: #4285F4; /* Color azul clásico de Google */
+    font-size: 1.2rem;
+}
+
+/* Footer de la tarjeta */
+.login-footer {
+    margin-top: 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 20px;
+}
+
+.login-footer p {
+    font-size: 0.8rem;
+    color: var(--texto-secundario);
+    margin-bottom: 15px;
+}
+
+.btn-volver-texto {
+    color: var(--color-foco);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-volver-texto:hover {
+    color: #b59bff;
+}
+
+/* --- Adaptabilidad (Móviles) --- */
+@media (max-width: 768px) {
+    .login-layout {
+        flex-direction: column;
+    }
+    .login-info-panel {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 40px 30px;
+    }
+    .login-action-panel {
+        padding: 40px 30px;
+    }
+}
