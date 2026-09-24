@@ -212,7 +212,9 @@ if (!usuarioActual) return;
 // ==========================================
 // 3. MÓDULO DE SEGURIDAD Y VALIDACIÓN
 // ==========================================
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+if (typeof pdfjsLib !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js'; // (Deja la URL exacta que tú ya tenías en esta línea)
+}
 const MAX_FILE_SIZE = 150 * 1024 * 1024; 
 
 function validarArchivoSeguro(archivo, mimePermitidos) {
