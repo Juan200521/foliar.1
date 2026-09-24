@@ -138,12 +138,12 @@
         </div>
 
         <!-- ESPACIO DE TRABAJO -->
-        <div id="espacio-trabajo" style="display: none;">
-            <button class="btn-secundario" onclick="volverAlMenu()"><i class="fa-solid fa-arrow-left"></i> Volver al menú</button>
+<div id="espacio-trabajo">
+       <button class="btn-secundario" onclick="cerrarHerramienta()"></button>()"><i class="fa-solid fa-arrow-left"></i> Volver al menú</button>
 
             <!-- 1. Unir PDF -->
-            <div id="herr-unir" class="tarjeta-herramienta" style="display: none;">
-                <h2 class="titulo-herramienta"><i class="fa-solid fa-link"></i> Unir PDF</h2>
+<div id="panel-unir" class="tarjeta-herramienta" style="display: none;"></div>
+            <h2 class="titulo-herramienta"><i class="fa-solid fa-link"></i> Unir PDF</h2>
                 <div class="zona-subida">
                     <i class="fa-solid fa-cloud-arrow-up icono-subida"></i>
                     <p class="texto-arrastre">Selecciona los documentos que deseas combinar</p>
@@ -316,37 +316,6 @@
     <script src="app.js?v=2.5" defer></script>
 
     <!-- ========================================== -->
-<!-- PANELES DE TRABAJO (Ocultos por defecto) -->
-<!-- ========================================== -->
-<div id="panel-unir" style="display: none;" class="panel-herramienta">
-    <button onclick="cerrarHerramienta()" style="margin-bottom: 20px; cursor: pointer; padding: 10px; border-radius: 5px; border: none; background: #6b21a8; color: white;">⬅ Volver al menú</button>
-    <h2>Unir archivos PDF</h2>
-    <p>Área para arrastrar archivos y unirlos.</p>
-</div>
-
-<div id="panel-dividir" style="display: none;" class="panel-herramienta">
-    <button onclick="cerrarHerramienta()" style="margin-bottom: 20px; cursor: pointer; padding: 10px; border-radius: 5px; border: none; background: #6b21a8; color: white;">⬅ Volver al menú</button>
-    <h2>Dividir PDF</h2>
-    <p>Área para extraer páginas de un documento.</p>
-</div>
-
-<div id="panel-eliminar" style="display: none;" class="panel-herramienta">
-    <button onclick="cerrarHerramienta()" style="margin-bottom: 20px; cursor: pointer; padding: 10px; border-radius: 5px; border: none; background: #6b21a8; color: white;">⬅ Volver al menú</button>
-    <h2>Eliminar páginas</h2>
-    <p>Área para quitar páginas de un PDF.</p>
-</div>
-
-<div id="panel-ordenar" style="display: none;" class="panel-herramienta">
-    <button onclick="cerrarHerramienta()" style="margin-bottom: 20px; cursor: pointer; padding: 10px; border-radius: 5px; border: none; background: #6b21a8; color: white;">⬅ Volver al menú</button>
-    <h2>Ordenar PDF</h2>
-    <p>Área para reorganizar las páginas.</p>
-</div>
-
-<div id="panel-comprimir" style="display: none;" class="panel-herramienta">
-    <button onclick="cerrarHerramienta()" style="margin-bottom: 20px; cursor: pointer; padding: 10px; border-radius: 5px; border: none; background: #6b21a8; color: white;">⬅ Volver al menú</button>
-    <h2>Comprimir PDF</h2>
-    <p>Área para reducir el peso de tu archivo.</p>
-</div>
 
 </body>
 </html>

@@ -823,5 +823,5 @@ window.cerrarHerramienta = function() {
     
     // 2. Volver a mostrar el menú principal de cuadritos
     const menuPrincipal = document.getElementById('menu-principal');
-    if (menuPrincipal) menuPrincipal.style.display = 'block';
+    if (menuPrincipal) menuPrincipal.style.display = '';
 };
