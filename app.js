@@ -159,8 +159,8 @@ async function respaldarEnFoliarDrive(blob, nombreArchivo, herramienta) {
 // ==========================================
 let oyenteHistorial = null; // Variable para controlar la conexión en vivo
 
-document.getElementById('btn-historial').addEventListener('click', () => {
-    if (!usuarioActual) return;
+document.getElementById('btn-historial')?.addEventListener('click', () => {
+if (!usuarioActual) return;
     const modal = document.getElementById('modal-drive');
     const lista = document.getElementById('lista-archivos');
     modal.style.display = 'flex';
