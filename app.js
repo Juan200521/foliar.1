@@ -323,7 +323,7 @@ function generarNombre(nombreOriginal, sufijo, extension = '.pdf') {
 // ==========================================
 
 // ---------- 1. Unir PDF (Respaldo en Nube Activado) ----------
-document.getElementById('botonUnir').addEventListener('click', async () => {
+document.getElementById('botonUnir')?.addEventListener('click', async () => {
   try {
     const files = document.getElementById('archivosUnir').files;
     if (files.length < 2) throw new Error('Elige al menos 2 archivos PDF.');
@@ -352,7 +352,7 @@ document.getElementById('botonUnir').addEventListener('click', async () => {
 });
 
 // ---------- 2. Dividir / Extraer páginas ----------
-document.getElementById('botonDividir').addEventListener('click', async () => {
+document.getElementById('botonDividir')?.addEventListener('click', async () => {
   try {
     const files = document.getElementById('archivoDividir').files;
     validarArchivoSeguro(files[0], ['application/pdf']);
@@ -394,7 +394,7 @@ let paginasParaEliminar = new Set();
 let archivoActualEliminar = null; 
 let totalPaginasEliminar = 0;
 
-document.getElementById('archivoEliminar').addEventListener('change', async (e) => {
+document.getElementById('archivoEliminar')?.addEventListener('change', async (e) => {
   const contenedorPrevia = document.getElementById('vistaPreviaEliminar');
   const botonEliminar = document.getElementById('botonEliminar');
   paginasParaEliminar.clear();
@@ -470,7 +470,7 @@ document.getElementById('botonEliminar').addEventListener('click', async () => {
 let ordenPaginasArray = [];
 let archivoActualOrdenar = null; 
 
-document.getElementById('archivoOrdenar').addEventListener('change', async (e) => {
+document.getElementById('archivoOrdenar')?.addEventListener('change', async (e) => {
   const contenedorPrevia = document.getElementById('vistaPreviaOrdenar');
   const botonOrdenar = document.getElementById('botonOrdenar');
   const instruccion = document.getElementById('instruccionOrdenar');
@@ -507,14 +507,14 @@ document.getElementById('archivoOrdenar').addEventListener('change', async (e) =
       divContenedor.appendChild(canvas);
       divContenedor.appendChild(divNumero);
       
-      divContenedor.addEventListener('dragstart', () => divContenedor.classList.add('arrastrando'));
-      divContenedor.addEventListener('dragend', () => {
+      divContenedor?.addEventListener('dragstart', () => divContenedor.classList.add('arrastrando'));
+      divContenedor?.addEventListener('dragend', () => {
         divContenedor.classList.remove('arrastrando');
         const elementos = contenedorPrevia.querySelectorAll('.miniatura-contenedor');
         ordenPaginasArray = Array.from(elementos).map(el => parseInt(el.dataset.indiceOriginal));
       });
       
-      divContenedor.addEventListener('dragover', (ev) => {
+      divContenedor?.addEventListener('dragover', (ev) => {
         ev.preventDefault();
         const arrastrado = document.querySelector('.arrastrando');
         if (arrastrado !== divContenedor) {
@@ -529,7 +529,7 @@ document.getElementById('archivoOrdenar').addEventListener('change', async (e) =
   } catch (e) { contenedorPrevia.innerHTML = '<p style="color:var(--color-ilovepdf);">Error al cargar PDF</p>'; manejarErrorControlado(e); }
 });
 
-document.getElementById('botonOrdenar').addEventListener('click', async () => {
+document.getElementById('botonOrdenar')?.addEventListener('click', async () => {
   try {
     if (!archivoActualOrdenar || !ordenPaginasArray.length) throw new Error('Sube un archivo primero.');
     const bytes = await archivoActualOrdenar.arrayBuffer();
@@ -546,8 +546,8 @@ document.getElementById('botonOrdenar').addEventListener('click', async () => {
 });
 
 // ---------- 5. Comprimir PDF ----------
-document.getElementById('calidadComprimir').addEventListener('input', e => document.getElementById('valorCalidad').textContent = e.target.value);
-document.getElementById('botonComprimir').addEventListener('click', async () => {
+document.getElementById('calidadComprimir')?.addEventListener('input', e => document.getElementById('valorCalidad').textContent = e.target.value);
+document.getElementById('botonComprimir')?.addEventListener('click', async () => {
   try {
     const files = document.getElementById('archivoComprimir').files;
     validarArchivoSeguro(files[0], ['application/pdf']);
@@ -581,7 +581,7 @@ document.getElementById('botonComprimir').addEventListener('click', async () => 
 });
 
 // ---------- 6. JPG/PNG a PDF ----------
-document.getElementById('botonImagen').addEventListener('click', async () => {
+document.getElementById('botonImagen')?.addEventListener('click', async () => {
   try {
     const files = document.getElementById('archivosImagen').files;
     if (files.length < 1) throw new Error('Selecciona al menos una imagen.');
@@ -603,7 +603,7 @@ document.getElementById('botonImagen').addEventListener('click', async () => {
 });
 
 // ---------- 7. PDF a JPG ----------
-document.getElementById('botonPdf2Jpg').addEventListener('click', async () => {
+document.getElementById('botonPdf2Jpg')?.addEventListener('click', async () => {
   try {
     const files = document.getElementById('archivoPdf2Jpg').files;
     validarArchivoSeguro(files[0], ['application/pdf']);
@@ -629,7 +629,7 @@ document.getElementById('botonPdf2Jpg').addEventListener('click', async () => {
 });
 
 // ---------- 12. PDF a Word ----------
-document.getElementById('botonPdf2Word').addEventListener('click', async () => {
+document.getElementById('botonPdf2Word')?.addEventListener('click', async () => {
   const btnId = 'botonPdf2Word';
   const textoOriginal = document.getElementById(btnId).innerHTML;
   try {
@@ -664,7 +664,7 @@ document.getElementById('botonPdf2Word').addEventListener('click', async () => {
 });
 
 // ---------- 13. Word a PDF ----------
-document.getElementById('botonWord2Pdf').addEventListener('click', async () => {
+document.getElementById('botonWord2Pdf')?.addEventListener('click', async () => {
   const btnId = 'botonWord2Pdf';
   const textoOriginal = document.getElementById(btnId).innerHTML;
   try {
@@ -695,7 +695,7 @@ document.getElementById('botonWord2Pdf').addEventListener('click', async () => {
 });
 
 // ---------- 8. Rotar PDF ----------
-document.getElementById('botonRotar').addEventListener('click', async () => {
+document.getElementById('botonRotar')?.addEventListener('click', async () => {
   try {
     const files = document.getElementById('archivoRotar').files;
     validarArchivoSeguro(files[0], ['application/pdf']);
@@ -714,7 +714,7 @@ document.getElementById('botonRotar').addEventListener('click', async () => {
 });
 
 // ---------- 9. Marca de agua ----------
-document.getElementById('botonMarca').addEventListener('click', async () => {
+document.getElementById('botonMarca')?.addEventListener('click', async () => {
   try {
     const files = document.getElementById('archivoMarca').files;
     validarArchivoSeguro(files[0], ['application/pdf']);
@@ -742,7 +742,7 @@ document.getElementById('botonMarca').addEventListener('click', async () => {
 });
 
 // ---------- 10. Números de página ----------
-document.getElementById('botonNumeros').addEventListener('click', async () => {
+document.getElementById('botonNumeros')?.addEventListener('click', async () => {
   try {
     const files = document.getElementById('archivoNumeros').files;
     validarArchivoSeguro(files[0], ['application/pdf']);
@@ -766,8 +766,8 @@ document.getElementById('botonNumeros').addEventListener('click', async () => {
 });
 
 // ---------- 11. Recortar PDF ----------
-document.getElementById('margenRecortar').addEventListener('input', e => document.getElementById('valorMargen').textContent = e.target.value);
-document.getElementById('botonRecortar').addEventListener('click', async () => {
+document.getElementById('margenRecortar')?.addEventListener('input', e => document.getElementById('valorMargen').textContent = e.target.value);
+document.getElementById('botonRecortar')?.addEventListener('click', async () => {
   try {
     const files = document.getElementById('archivoRecortar').files;
     validarArchivoSeguro(files[0], ['application/pdf']);
