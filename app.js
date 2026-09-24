@@ -802,13 +802,26 @@ document.getElementById('botonRecortar')?.addEventListener('click', async () => 
 // CONTROLADOR DE HERRAMIENTAS
 // ==========================================
 window.abrirHerramienta = function(nombreHerramienta) {
-    if (!usuarioActual) {
-        alert("🔒 Por favor, inicia sesión con Google para usar las herramientas.");
-        return;
+    // 1. Ocultar el menú donde están todos los cuadros
+    const menuPrincipal = document.getElementById('menu-principal');
+    if (menuPrincipal) menuPrincipal.style.display = 'none';
+
+    // 2. Buscar y mostrar el panel de la herramienta seleccionada
+    const panelSeleccionado = document.getElementById('panel-' + nombreHerramienta);
+    
+    if (panelSeleccionado) {
+        panelSeleccionado.style.display = 'block';
+    } else {
+        console.warn("Aún falta crear el contenedor HTML con el ID: panel-" + nombreHerramienta);
     }
+};
+
+window.cerrarHerramienta = function() {
+    // 1. Ocultar absolutamente todos los paneles de herramientas
+    const paneles = document.querySelectorAll('[id^="panel-"]');
+    paneles.forEach(panel => panel.style.display = 'none');
     
-    // Alerta temporal para comprobar que el botón revivió
-    alert("Herramienta seleccionada: " + nombreHerramienta);
-    
-    // Aquí pondremos el código para abrir la pantalla de trabajo de la herramienta
+    // 2. Volver a mostrar el menú principal de cuadritos
+    const menuPrincipal = document.getElementById('menu-principal');
+    if (menuPrincipal) menuPrincipal.style.display = 'block';
 };
