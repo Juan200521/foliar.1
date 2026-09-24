@@ -33,20 +33,45 @@ const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}
 let usuarioActual = null;
 
 auth.onAuthStateChanged(user => {
-  const btnLogin = document.getElementById('btn-login');
-  const infoUsuario = document.getElementById('info-usuario');
-  const nombreUsuario = document.getElementById('nombre-usuario');
+    // Detectamos si la URL actual tiene "login.html"
+    const estamosEnLogin = window.location.href.includes('login.html');
 
-  if (user) {
-    usuarioActual = user;
-    btnLogin.style.display = 'none';
-    infoUsuario.style.display = 'flex';
-    nombreUsuario.textContent = `Hola, ${user.displayName.split(' ')[0]}`;
-  } else {
-    usuarioActual = null;
-    btnLogin.style.display = 'inline-block';
-    infoUsuario.style.display = 'none';
-  }
+    if (user) {
+        usuarioActual = user;
+        
+        // --- REDIRECCIÓN MÁGICA ---
+        // Si el usuario ya inició sesión y la página actual es el Login, lo mandamos al index
+        if (estamosEnLogin) {
+            window.location.href = 'index.html';
+            return; // Importante para que no siga ejecutando el resto
+        }
+
+        // --- LÓGICA PARA INDEX.HTML ---
+        // Usamos ?. para que no dé error si estos elementos no existen
+        const btnLogin = document.getElementById('btn-login');
+        if (btnLogin) btnLogin.style.display = 'none';
+
+        const infoUsuario = document.getElementById('info-usuario');
+        if (infoUsuario) infoUsuario.style.display = 'flex';
+
+        const nombreUsuario = document.getElementById('nombre-usuario');
+        if (nombreUsuario && user.displayName) {
+             // Mantengo tu formato: "Hola, Nombre"
+            nombreUsuario.textContent = `Hola, ${user.displayName.split(' ')[0]}`;
+        }
+
+    } else {
+        usuarioActual = null;
+        
+        // Solo intentamos mostrar el botón si NO estamos en la página de login
+        if (!estamosEnLogin) {
+            const btnLogin = document.getElementById('btn-login');
+            if (btnLogin) btnLogin.style.display = 'inline-block';
+            
+            const infoUsuario = document.getElementById('info-usuario');
+            if (infoUsuario) infoUsuario.style.display = 'none';
+        }
+    }
 });
 
 // Botón de la página principal (index.html)
