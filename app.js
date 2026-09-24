@@ -83,7 +83,16 @@ document.getElementById('btn-login')?.addEventListener('click', () => {
 document.getElementById('btn-login-google')?.addEventListener('click', () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' }); 
-    auth.signInWithRedirect(provider); 
+    
+    // Usamos Popup en lugar de Redirect
+    auth.signInWithPopup(provider)
+        .then((result) => {
+            // Al tener éxito, el código te envía a tu panel principal
+            window.location.href = 'index.html';
+        })
+        .catch((error) => {
+            console.error("Error al iniciar sesión con Google:", error);
+        });
 });
 
 // Botón de cerrar sesión
