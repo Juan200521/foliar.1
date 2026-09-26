@@ -216,6 +216,10 @@ body {
     gap: 15px;
 }
 
+.zona-subida input[type="file"] {
+    display: none;
+}
+
 .zona-subida:hover {
   border-color: var(--color-foco);
   background: rgba(139, 92, 246, 0.05);
