@@ -258,27 +258,6 @@ function manejarErrorControlado(e, botonId, textoBotonOriginal) {
     }
 }
 
-// ---------- Navegación del Menú (SPA) ----------
-function abrirHerramienta(idHerramienta) {
-  document.getElementById('menu-principal').style.display = 'none';
-  document.getElementById('espacio-trabajo').style.display = 'block';
-  document.querySelectorAll('.tarjeta-herramienta').forEach(seccion => seccion.style.display = 'none');
-  document.getElementById('herr-' + idHerramienta).style.display = 'block';
-  window.scrollTo(0, 0);
-}
-
-function volverAlMenu() {
-  document.getElementById('espacio-trabajo').style.display = 'none';
-  document.getElementById('menu-principal').style.display = 'grid';
-  document.querySelectorAll('.btn-gigante').forEach(label => {
-    if(label.getAttribute('for') === 'archivosImagen') label.textContent = 'Elegir imágenes';
-    else if(label.getAttribute('for') === 'archivosUnir') label.textContent = 'Elegir archivos PDF';
-    else if(label.getAttribute('for') === 'archivoWord2Pdf') label.textContent = 'Elegir archivo Word';
-    else label.textContent = 'Elegir archivo PDF';
-  });
-  window.scrollTo(0, 0);
-}
-
 document.querySelectorAll('input[type="file"]').forEach(input => {
   input?.addEventListener('change', function() {
     const label = this.previousElementSibling;
