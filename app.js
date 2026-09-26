@@ -781,31 +781,42 @@ document.getElementById('botonRecortar')?.addEventListener('click', async () => 
 // CONTROLADOR DE HERRAMIENTAS
 // ==========================================
 window.abrirHerramienta = function(nombreHerramienta) {
-    // 1. Teletransportar el menú fuera de la pantalla (Bulletproof para el iframe de Google)
+    // 1. Truco para Google: Hacer el menú invisible y enviarlo al fondo en vez de destruirlo
     const menuPrincipal = document.getElementById('menu-principal');
     if (menuPrincipal) {
-        menuPrincipal.style.position = 'fixed';
-        menuPrincipal.style.left = '-9999px';
+        menuPrincipal.style.position = 'absolute';
+        menuPrincipal.style.opacity = '0';
+        menuPrincipal.style.pointerEvents = 'none';
+        menuPrincipal.style.zIndex = '-100';
     }
 
-    // 2. Buscar y mostrar el panel de la herramienta seleccionada
+    // 2. Mostrar el contenedor de trabajo
+    const espacioTrabajo = document.getElementById('espacio-trabajo');
+    if (espacioTrabajo) espacioTrabajo.style.display = 'block';
+
+    // 3. Ocultar todas las herramientas y mostrar solo la seleccionada
+    const paneles = document.querySelectorAll('.tarjeta-herramienta');
+    paneles.forEach(panel => panel.style.display = 'none');
+
     const panelSeleccionado = document.getElementById('panel-' + nombreHerramienta);
-    if (panelSeleccionado) {
-        panelSeleccionado.style.display = 'block';
-    }
+    if (panelSeleccionado) panelSeleccionado.style.display = 'block';
+
     window.scrollTo(0, 0);
 };
 
 window.cerrarHerramienta = function() {
-    // 1. Ocultar absolutamente todos los paneles de herramientas
-    const paneles = document.querySelectorAll('[id^="panel-"]');
-    paneles.forEach(panel => panel.style.display = 'none');
+    // 1. Ocultar el contenedor de trabajo completo
+    const espacioTrabajo = document.getElementById('espacio-trabajo');
+    if (espacioTrabajo) espacioTrabajo.style.display = 'none';
 
-    // 2. Devolver el menú a su posición original en la pantalla
+    // 2. Restaurar el menú principal y el botón de Google a la normalidad
     const menuPrincipal = document.getElementById('menu-principal');
     if (menuPrincipal) {
         menuPrincipal.style.position = '';
-        menuPrincipal.style.left = '';
+        menuPrincipal.style.opacity = '';
+        menuPrincipal.style.pointerEvents = '';
+        menuPrincipal.style.zIndex = '';
     }
+
     window.scrollTo(0, 0);
 };
