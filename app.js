@@ -802,21 +802,17 @@ document.getElementById('botonRecortar')?.addEventListener('click', async () => 
 // CONTROLADOR DE HERRAMIENTAS
 // ==========================================
 window.abrirHerramienta = function(nombreHerramienta) {
-    // 1. Ocultar el menú (Truco para no destruir el iframe del botón de Google)
+    // 1. Teletransportar el menú fuera de la pantalla (Bulletproof para el iframe de Google)
     const menuPrincipal = document.getElementById('menu-principal');
     if (menuPrincipal) {
-        menuPrincipal.style.position = 'absolute';
-        menuPrincipal.style.visibility = 'hidden';
-        menuPrincipal.style.opacity = '0';
-        menuPrincipal.style.pointerEvents = 'none';
+        menuPrincipal.style.position = 'fixed';
+        menuPrincipal.style.left = '-9999px';
     }
 
     // 2. Buscar y mostrar el panel de la herramienta seleccionada
     const panelSeleccionado = document.getElementById('panel-' + nombreHerramienta);
     if (panelSeleccionado) {
         panelSeleccionado.style.display = 'block';
-    } else {
-        console.warn("Aún falta crear el contenedor HTML con el ID: panel-" + nombreHerramienta);
     }
     window.scrollTo(0, 0);
 };
@@ -826,13 +822,11 @@ window.cerrarHerramienta = function() {
     const paneles = document.querySelectorAll('[id^="panel-"]');
     paneles.forEach(panel => panel.style.display = 'none');
 
-    // 2. Volver a mostrar el menú principal restaurando sus estilos
+    // 2. Devolver el menú a su posición original en la pantalla
     const menuPrincipal = document.getElementById('menu-principal');
     if (menuPrincipal) {
         menuPrincipal.style.position = '';
-        menuPrincipal.style.visibility = '';
-        menuPrincipal.style.opacity = '';
-        menuPrincipal.style.pointerEvents = '';
+        menuPrincipal.style.left = '';
     }
     window.scrollTo(0, 0);
 };
