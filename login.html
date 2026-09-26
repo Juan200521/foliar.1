@@ -37,14 +37,51 @@
                 <h2>Accede a tu cuenta</h2>
                 <p>Ingresa para empezar a gestionar tus archivos PDF de forma segura.</p>
                 
-                <button id="btn-login-google" class="btn-google-login">
-                    <i class="fa-brands fa-google"></i> Continuar con Google
-                </button>
-                
-                <div class="login-footer">
-                    <p>¿No tienes cuenta? <br> Google creará una automáticamente al iniciar sesión.</p>
-                    <a href="index.html" class="btn-volver-texto"><i class="fa-solid fa-arrow-left"></i> Volver al inicio</a>
-                </div>
+               <!-- Formulario Seguro Híbrido (Correo + Google) -->
+<form id="formulario-login" novalidate style="width: 100%; margin: 0 auto;">
+    
+    <!-- Contenedor para mensajes de error controlados -->
+    <div id="mensaje-error-login" style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; padding: 0.8rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; text-align: left;">
+    </div>
+
+    <!-- Campo de Correo -->
+    <div style="margin-bottom: 1.5rem; text-align: left;">
+        <label for="email-login" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--texto-secundario);">Correo Electrónico</label>
+        <input type="email" id="email-login" name="email" required autocomplete="username" placeholder="ejemplo@correo.com" style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; font-family: inherit; box-sizing: border-box;">
+    </div>
+
+    <!-- Campo de Contraseña con enlace de recuperación -->
+    <div style="margin-bottom: 2rem; text-align: left;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <label for="password-login" style="font-size: 0.9rem; color: var(--texto-secundario);">Contraseña</label>
+            <a href="recuperar.html" style="font-size: 0.85rem; color: var(--color-foco); text-decoration: none; transition: var(--transicion-suave);">¿Olvidaste tu contraseña?</a>
+        </div>
+        <input type="password" id="password-login" name="password" required autocomplete="current-password" placeholder="••••••••" style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; font-family: inherit; box-sizing: border-box;">
+    </div>
+
+    <!-- Botón de Envío (Correo) -->
+    <button type="submit" id="btn-login-email" style="width: 100%; background-color: var(--color-foco); color: white; font-weight: bold; padding: 1rem; border-radius: 50px; cursor: pointer; border: none; font-size: 1rem; transition: var(--transicion-suave); margin-bottom: 0.5rem;">
+        Iniciar Sesión
+    </button>
+
+    <!-- Separador Visual -->
+    <div style="display: flex; align-items: center; margin: 1.5rem 0;">
+        <hr style="flex-grow: 1; border: none; border-top: 1px solid rgba(255,255,255,0.1);">
+        <span style="margin: 0 1rem; color: var(--texto-secundario); font-size: 0.9rem;">O</span>
+        <hr style="flex-grow: 1; border: none; border-top: 1px solid rgba(255,255,255,0.1);">
+    </div>
+
+    <!-- Botón de Google Restaurado -->
+    <button type="button" id="btn-login-google" class="btn-google-login" style="width: 100%; margin-bottom: 1.5rem;">
+        <i class="fa-brands fa-google"></i> Continuar con Google
+    </button>
+</form>
+
+<!-- Pie del panel con opciones extra -->
+<div class="login-footer">
+    <p style="margin-bottom: 1rem;">¿No tienes cuenta? <a href="registro.html" style="color: var(--color-foco); font-weight: bold; text-decoration: none;">Regístrate</a></p>
+    <a href="index.html" class="btn-volver-texto"><i class="fa-solid fa-arrow-left"></i> Volver al inicio</a>
+</div>
             </div>
         </div>
 
