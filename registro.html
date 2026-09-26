@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - Foliar</title>
+    <!-- Mantenemos tu hoja de estilos principal -->
+<link rel="stylesheet" href="style.css?v=6">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <!-- Iconos de FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="login-body">
+
+    <div class="login-layout">
+        
+        <!-- Panel Izquierdo: Información -->
+        <div class="login-info-panel">
+            <a href="index.html" class="logo-enlace">
+                <h1 class="logo-text"><i class="fa-solid fa-layer-group"></i> Foliar</h1>
+            </a>
+            <h2>Herramientas PDF para gente productiva</h2>
+            <p class="login-description">
+                Foliar te ayuda a gestionar tus documentos de forma rápida, segura y 100% online. Disfruta de un entorno diseñado para optimizar tu flujo de trabajo.
+            </p>
+            
+            <ul class="login-features">
+                <li><i class="fa-solid fa-link"></i> <strong>Une archivos:</strong> Combina múltiples PDF en uno solo al instante.</li>
+                <li><i class="fa-solid fa-scissors"></i> <strong>Divide documentos:</strong> Extrae las páginas exactas que necesitas.</li>
+                <li><i class="fa-solid fa-cloud-arrow-up"></i> <strong>Respaldo automático:</strong> Guarda tu progreso directamente en la nube.</li>
+            </ul>
+        </div>
+
+        <!-- Panel Derecho: Formulario -->
+        <div class="login-action-panel">
+            <div class="login-card">
+                <h2>Crea tu cuenta</h2>
+<p>Regístrate para gestionar tus PDF de forma segura y con respaldo en la nube.</p>                
+               <!-- Formulario Seguro Híbrido (Correo + Google) -->
+<!-- Formulario Seguro de Registro -->
+<form id="formulario-registro" novalidate style="width: 100%; margin: 0 auto;">
+    
+    <!-- Contenedor para mensajes de error controlados -->
+    <div id="mensaje-error-registro" style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; padding: 0.8rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; text-align: left;">
+    </div>
+
+    <!-- Fila para Nombre y Apellido -->
+    <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+        <div style="flex: 1; text-align: left;">
+            <label for="nombre-registro" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--texto-secundario);">Nombre</label>
+            <input type="text" id="nombre-registro" name="nombre" required placeholder="Tu nombre" style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; font-family: inherit; box-sizing: border-box;">
+        </div>
+        <div style="flex: 1; text-align: left;">
+            <label for="apellido-registro" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--texto-secundario);">Apellido</label>
+            <input type="text" id="apellido-registro" name="apellido" required placeholder="Tu apellido" style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; font-family: inherit; box-sizing: border-box;">
+        </div>
+    </div>
+
+    <!-- Campo de Teléfono -->
+    <div style="margin-bottom: 1.5rem; text-align: left;">
+        <label for="telefono-registro" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--texto-secundario);">Teléfono Móvil</label>
+        <input type="tel" id="telefono-registro" name="telefono" required placeholder="+57 300 000 0000" style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; font-family: inherit; box-sizing: border-box;">
+    </div>
+
+    <!-- Campo de Correo -->
+    <div style="margin-bottom: 1.5rem; text-align: left;">
+        <label for="email-registro" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--texto-secundario);">Correo Electrónico</label>
+        <input type="email" id="email-registro" name="email" required autocomplete="username" placeholder="ejemplo@correo.com" style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; font-family: inherit; box-sizing: border-box;">
+    </div>
+
+    <!-- Campo de Contraseña -->
+    <div style="margin-bottom: 2rem; text-align: left;">
+        <label for="password-registro" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--texto-secundario);">Crear Contraseña <span style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">(Mínimo 6 caracteres)</span></label>
+        <input type="password" id="password-registro" name="password" required autocomplete="new-password" placeholder="••••••••" minlength="6" style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; font-family: inherit; box-sizing: border-box;">
+    </div>
+
+    <!-- Botón de Envío -->
+    <button type="submit" id="btn-crear-cuenta" style="width: 100%; background-color: var(--color-foco); color: white; font-weight: bold; padding: 1rem; border-radius: 50px; cursor: pointer; border: none; font-size: 1rem; transition: var(--transicion-suave); margin-bottom: 0.5rem;">
+        Crear Cuenta Segura
+    </button>
+
+</form>
+
+<!-- Pie del panel -->
+<div class="login-footer">
+    <p style="margin-bottom: 1rem;">¿Ya tienes cuenta? <a href="login.html" style="color: var(--color-foco); font-weight: bold; text-decoration: none;">Inicia Sesión</a></p>
+    <a href="index.html" class="btn-volver-texto"><i class="fa-solid fa-arrow-left"></i> Volver al inicio</a>
+</div>
+        </div>
+
+    </div>
+
+    <!-- Firebase SDK (Igual que en tu index) -->
+    <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Conexión a tu lógica de JS -->
+<script src="app.js?v=6"></script>
+</body>
+</html>
