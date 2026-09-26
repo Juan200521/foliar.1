@@ -198,14 +198,22 @@ body {
 
 /* --- ZONA DE SUBIDA (WOW FACTOR) --- */
 .zona-subida {
-  text-align: center;
-  padding: 4rem 2rem;
-  border: 2px dashed rgba(139, 92, 246, 0.4);
-  border-radius: var(--radio-curvo);
-  background: rgba(0, 0, 0, 0.2);
-  transition: var(--transicion-suave);
-  margin-bottom: 2rem;
-  position: relative;
+    /* Tus estilos originales intactos */
+    text-align: center;
+    padding: 4rem 2rem;
+    border: 2px dashed rgba(139, 92, 246, 0.4);
+    border-radius: var(--radio-curvo);
+    background: rgba(0, 0, 0, 0.2);
+    transition: var(--transicion-suave);
+    margin-bottom: 2rem;
+    position: relative;
+
+    /* El nuevo ajuste para que todo se apile verticalmente y centrado */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
 }
 
 .zona-subida:hover {
