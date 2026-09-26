@@ -176,144 +176,175 @@
                 <button id="botonDividir" class="btn-accion">Dividir Documento <i class="fa-solid fa-wand-magic-sparkles"></i></button>
             </div>
 
-            <!-- 3. Eliminar Páginas -->
-            <div id="herr-eliminar" class="tarjeta-herramienta" style="display: none;">
-                <h2 class="titulo-herramienta"><i class="fa-solid fa-trash-can"></i> Eliminar páginas</h2>
-                <div class="zona-subida">
-                    <i class="fa-solid fa-cloud-arrow-up icono-subida"></i>
-                    <label for="archivoEliminar" class="btn-gigante">Elegir archivo PDF</label>
-                    <input type="file" id="archivoEliminar" accept="application/pdf" style="display: none;">
-                </div>
-                <div id="vistaPreviaEliminar" class="vista-previa-grid"></div>
-                <button id="botonEliminar" class="btn-accion" style="display: none;">Eliminar páginas marcadas <i class="fa-solid fa-wand-magic-sparkles"></i></button>
+           <!-- 3. Eliminar Páginas -->
+        <div id="panel-eliminar" class="tarjeta-herramienta" style="display: none;">
+            <button class="btn-secundario" onclick="cerrarHerramienta()" style="margin-bottom: 20px;">
+                <i class="fa-solid fa-arrow-left"></i> Volver al menú
+            </button>
+            <h2 class="titulo-herramienta"><i class="fa-solid fa-trash-can"></i> Eliminar Páginas</h2>
+            <div class="zona-subida">
+                <i class="fa-solid fa-cloud-arrow-up icono-subida"></i>
+                <label for="archivoEliminar" class="btn-gigante">Elegir archivo PDF</label>
+                <input type="file" id="archivoEliminar" accept="application/pdf">
             </div>
+            <div id="vistaPreviaEliminar" class="vista-previa-grid"></div>
+            <button id="botonEliminar" class="btn-accion" style="display: none;">Eliminar Páginas</button>
+        </div>
 
-            <!-- 4. Ordenar Páginas -->
-            <div id="herr-ordenar" class="tarjeta-herramienta" style="display: none;">
-                <h2 class="titulo-herramienta"><i class="fa-solid fa-arrow-down-a-z"></i> Ordenar páginas</h2>
-                <div class="zona-subida">
-                    <i class="fa-solid fa-cloud-arrow-up icono-subida"></i>
-                    <label for="archivoOrdenar" class="btn-gigante">Elegir archivo PDF</label>
-                    <input type="file" id="archivoOrdenar" accept="application/pdf" style="display: none;">
-                </div>
-                <p id="instruccionOrdenar" style="display:none; text-align:center; color:var(--texto-secundario); margin-top: 15px;"><i class="fa-solid fa-hand-pointer"></i> Arrastra y suelta las páginas para reordenarlas.</p>
-                <div id="vistaPreviaOrdenar" class="vista-previa-grid"></div>
-                <button id="botonOrdenar" class="btn-accion" style="display: none;">Guardar nuevo orden <i class="fa-solid fa-wand-magic-sparkles"></i></button>
+        <!-- 4. Ordenar Páginas -->
+        <div id="panel-ordenar" class="tarjeta-herramienta" style="display: none;">
+            <button class="btn-secundario" onclick="cerrarHerramienta()" style="margin-bottom: 20px;">
+                <i class="fa-solid fa-arrow-left"></i> Volver al menú
+            </button>
+            <h2 class="titulo-herramienta"><i class="fa-solid fa-arrow-down-a-z"></i> Ordenar PDF</h2>
+            <div class="zona-subida">
+                <i class="fa-solid fa-cloud-arrow-up icono-subida"></i>
+                <label for="archivoOrdenar" class="btn-gigante">Elegir archivo PDF</label>
+                <input type="file" id="archivoOrdenar" accept="application/pdf">
             </div>
+            <p id="instruccionOrdenar" style="display:none; text-align:center;">Arrastra las páginas para reordenarlas</p>
+            <div id="vistaPreviaOrdenar" class="vista-previa-grid"></div>
+            <button id="botonOrdenar" class="btn-accion" style="display:none;">Generar PDF Ordenado</button>
+        </div>
 
-            <!-- 5. Comprimir PDF -->
-            <div id="herr-comprimir" class="tarjeta-herramienta" style="display: none;">
-                <h2 class="titulo-herramienta"><i class="fa-solid fa-compress"></i> Comprimir PDF</h2>
-                <div class="zona-subida">
-                    <i class="fa-solid fa-cloud-arrow-up icono-subida"></i>
-                    <label for="archivoComprimir" class="btn-gigante">Elegir archivo PDF</label>
-                    <input type="file" id="archivoComprimir" accept="application/pdf" style="display: none;">
-                </div>
-                <div class="campo">
-                    <label><i class="fa-solid fa-sliders"></i> Calidad de compresión: <span id="valorCalidad" style="color: var(--color-foco); font-weight: bold;">70</span>%</label>
-                    <input type="range" id="calidadComprimir" min="10" max="100" value="70">
-                </div>
-                <button id="botonComprimir" class="btn-accion">Comprimir Documento <i class="fa-solid fa-wand-magic-sparkles"></i></button>
+        <!-- 5. Comprimir PDF -->
+        <div id="panel-comprimir" class="tarjeta-herramienta" style="display: none;">
+            <button class="btn-secundario" onclick="cerrarHerramienta()" style="margin-bottom: 20px;">
+                <i class="fa-solid fa-arrow-left"></i> Volver al menú
+            </button>
+            <h2 class="titulo-herramienta"><i class="fa-solid fa-compress"></i> Comprimir PDF</h2>
+            <div class="zona-subida">
+                <i class="fa-solid fa-cloud-arrow-up icono-subida"></i>
+                <label for="archivoComprimir" class="btn-gigante">Elegir archivo PDF</label>
+                <input type="file" id="archivoComprimir" accept="application/pdf">
             </div>
-
-            <!-- 6. JPG a PDF -->
-            <div id="herr-imagen-pdf" class="tarjeta-herramienta" style="display: none;">
-                <h2 class="titulo-herramienta"><i class="fa-solid fa-image"></i> JPG/PNG a PDF</h2>
-                <div class="zona-subida">
-                    <i class="fa-solid fa-cloud-arrow-up icono-subida"></i>
-                    <label for="archivosImagen" class="btn-gigante">Elegir imágenes</label>
-                    <input type="file" id="archivosImagen" multiple accept="image/png, image/jpeg" style="display: none;">
-                </div>
-                <button id="botonImagen" class="btn-accion">Convertir a PDF <i class="fa-solid fa-wand-magic-sparkles"></i></button>
+            <div class="campo">
+                <label><i class="fa-solid fa-sliders"></i> Calidad (0-100): <span id="valorCalidad">50</span></label>
+                <input type="range" id="calidadComprimir" min="10" max="100" value="50">
             </div>
+            <button id="botonComprimir" class="btn-accion">Comprimir Documento</button>
+        </div>
 
-            <!-- 7. PDF a JPG -->
-            <div id="herr-pdf-jpg" class="tarjeta-herramienta" style="display: none;">
-                <h2 class="titulo-herramienta"><i class="fa-solid fa-images"></i> PDF a JPG</h2>
-                <div class="zona-subida">
-                    <i class="fa-solid fa-cloud-arrow-up icono-subida"></i>
-                    <label for="archivoPdf2Jpg" class="btn-gigante">Elegir archivo PDF</label>
-                    <input type="file" id="archivoPdf2Jpg" accept="application/pdf" style="display: none;">
-                </div>
-                <button id="botonPdf2Jpg" class="btn-accion">Extraer imágenes <i class="fa-solid fa-wand-magic-sparkles"></i></button>
+        <!-- 6. JPG a PDF -->
+        <div id="panel-imagen-pdf" class="tarjeta-herramienta" style="display: none;">
+            <button class="btn-secundario" onclick="cerrarHerramienta()" style="margin-bottom: 20px;">
+                <i class="fa-solid fa-arrow-left"></i> Volver al menú
+            </button>
+            <h2 class="titulo-herramienta"><i class="fa-solid fa-image"></i> JPG a PDF</h2>
+            <div class="zona-subida">
+                <i class="fa-solid fa-cloud-arrow-up icono-subida"></i>
+                <label for="archivosImagen" class="btn-gigante">Elegir imágenes</label>
+                <input type="file" id="archivosImagen" multiple accept="image/*">
             </div>
+            <button id="botonImagen" class="btn-accion">Convertir a PDF</button>
+        </div>
 
-            <!-- 12. PDF a Word -->
-            <div id="herr-pdf-word" class="tarjeta-herramienta" style="display: none;">
-                <h2 class="titulo-herramienta"><i class="fa-solid fa-file-word"></i> PDF a Word</h2>
-                <div class="zona-subida">
-                    <i class="fa-solid fa-cloud-arrow-up icono-subida"></i>
-                    <label for="archivoPdf2Word" class="btn-gigante">Elegir archivo PDF</label>
-                    <input type="file" id="archivoPdf2Word" accept="application/pdf" style="display: none;">
-                </div>
-                <p class="nota-herramienta"><i class="fa-solid fa-circle-info"></i> Extrae el texto puro del PDF a Word. No retiene imágenes ni diseños complejos.</p>
-                <button id="botonPdf2Word" class="btn-accion">Extraer texto a Word <i class="fa-solid fa-wand-magic-sparkles"></i></button>
+        <!-- 7. PDF a JPG -->
+        <div id="panel-pdf-jpg" class="tarjeta-herramienta" style="display: none;">
+            <button class="btn-secundario" onclick="cerrarHerramienta()" style="margin-bottom: 20px;">
+                <i class="fa-solid fa-arrow-left"></i> Volver al menú
+            </button>
+            <h2 class="titulo-herramienta"><i class="fa-solid fa-images"></i> PDF a JPG</h2>
+            <div class="zona-subida">
+                <i class="fa-solid fa-cloud-arrow-up icono-subida"></i>
+                <label for="archivoPdf2Jpg" class="btn-gigante">Elegir archivo PDF</label>
+                <input type="file" id="archivoPdf2Jpg" accept="application/pdf">
             </div>
+            <button id="botonPdf2Jpg" class="btn-accion">Extraer imágenes</button>
+        </div>
 
-            <!-- 13. Word a PDF -->
-            <div id="herr-word-pdf" class="tarjeta-herramienta" style="display: none;">
-                <h2 class="titulo-herramienta"><i class="fa-solid fa-file-pdf"></i> Word a PDF</h2>
-                <div class="zona-subida">
-                    <i class="fa-solid fa-cloud-arrow-up icono-subida"></i>
-                    <label for="archivoWord2Pdf" class="btn-gigante">Elegir archivo Word</label>
-                    <input type="file" id="archivoWord2Pdf" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" style="display: none;">
-                </div>
-                <p class="nota-herramienta"><i class="fa-solid fa-circle-info"></i> Compatible con archivos .docx. Procesamiento 100% privado.</p>
-                <button id="botonWord2Pdf" class="btn-accion">Convertir a PDF <i class="fa-solid fa-wand-magic-sparkles"></i></button>
+        <!-- 12. PDF a Word -->
+        <div id="panel-pdf-word" class="tarjeta-herramienta" style="display: none;">
+            <button class="btn-secundario" onclick="cerrarHerramienta()" style="margin-bottom: 20px;">
+                <i class="fa-solid fa-arrow-left"></i> Volver al menú
+            </button>
+            <h2 class="titulo-herramienta"><i class="fa-solid fa-file-word"></i> PDF a Word</h2>
+            <div class="zona-subida">
+                <i class="fa-solid fa-cloud-arrow-up icono-subida"></i>
+                <label for="archivoPdf2Word" class="btn-gigante">Elegir archivo PDF</label>
+                <input type="file" id="archivoPdf2Word" accept="application/pdf">
             </div>
+            <p class="nota-herramienta"><i class="fa-solid fa-circle-info"></i> Nota: Extrae texto usando OCR básico</p>
+            <button id="botonPdf2Word" class="btn-accion">Extraer texto a DOCX</button>
+        </div>
 
-            <!-- 8. Rotar PDF -->
-            <div id="herr-rotar" class="tarjeta-herramienta" style="display: none;">
-                <h2 class="titulo-herramienta"><i class="fa-solid fa-rotate-right"></i> Rotar PDF</h2>
-                <div class="zona-subida">
-                    <i class="fa-solid fa-cloud-arrow-up icono-subida"></i>
-                    <label for="archivoRotar" class="btn-gigante">Elegir archivo PDF</label>
-                    <input type="file" id="archivoRotar" accept="application/pdf" style="display: none;">
-                </div>
-                <button id="botonRotar" class="btn-accion">Rotar Documento 90° <i class="fa-solid fa-wand-magic-sparkles"></i></button>
+        <!-- 13. Word a PDF -->
+        <div id="panel-word-pdf" class="tarjeta-herramienta" style="display: none;">
+            <button class="btn-secundario" onclick="cerrarHerramienta()" style="margin-bottom: 20px;">
+                <i class="fa-solid fa-arrow-left"></i> Volver al menú
+            </button>
+            <h2 class="titulo-herramienta"><i class="fa-solid fa-file-pdf"></i> Word a PDF</h2>
+            <div class="zona-subida">
+                <i class="fa-solid fa-cloud-arrow-up icono-subida"></i>
+                <label for="archivoWord2Pdf" class="btn-gigante">Elegir archivo Word</label>
+                <input type="file" id="archivoWord2Pdf" accept=".docx, .doc">
             </div>
+            <p class="nota-herramienta"><i class="fa-solid fa-circle-info"></i> Requiere procesar archivo localmente</p>
+            <button id="botonWord2Pdf" class="btn-accion">Convertir a PDF</button>
+        </div>
 
-            <!-- 9. Marca de agua -->
-            <div id="herr-marca" class="tarjeta-herramienta" style="display: none;">
-                <h2 class="titulo-herramienta"><i class="fa-solid fa-stamp"></i> Marca de agua</h2>
-                <div class="zona-subida">
-                    <i class="fa-solid fa-cloud-arrow-up icono-subida"></i>
-                    <label for="archivoMarca" class="btn-gigante">Elegir archivo PDF</label>
-                    <input type="file" id="archivoMarca" accept="application/pdf" style="display: none;">
-                </div>
-                <div class="campo">
-                    <label><i class="fa-solid fa-pen-nib"></i> Texto de la marca</label>
-                    <input type="text" id="textoMarca" placeholder="Ej: CONFIDENCIAL" autocomplete="off" maxlength="50">
-                </div>
-                <button id="botonMarca" class="btn-accion">Insertar marca de agua <i class="fa-solid fa-wand-magic-sparkles"></i></button>
+        <!-- 8. Rotar PDF -->
+        <div id="panel-rotar" class="tarjeta-herramienta" style="display: none;">
+            <button class="btn-secundario" onclick="cerrarHerramienta()" style="margin-bottom: 20px;">
+                <i class="fa-solid fa-arrow-left"></i> Volver al menú
+            </button>
+            <h2 class="titulo-herramienta"><i class="fa-solid fa-rotate-right"></i> Rotar PDF</h2>
+            <div class="zona-subida">
+                <i class="fa-solid fa-cloud-arrow-up icono-subida"></i>
+                <label for="archivoRotar" class="btn-gigante">Elegir archivo PDF</label>
+                <input type="file" id="archivoRotar" accept="application/pdf">
             </div>
+            <button id="botonRotar" class="btn-accion">Rotar Documento</button>
+        </div>
 
-            <!-- 10. Numerar Páginas -->
-            <div id="herr-numeros" class="tarjeta-herramienta" style="display: none;">
-                <h2 class="titulo-herramienta"><i class="fa-solid fa-list-ol"></i> Numerar páginas</h2>
-                <div class="zona-subida">
-                    <i class="fa-solid fa-cloud-arrow-up icono-subida"></i>
-                    <label for="archivoNumeros" class="btn-gigante">Elegir archivo PDF</label>
-                    <input type="file" id="archivoNumeros" accept="application/pdf" style="display: none;">
-                </div>
-                <button id="botonNumeros" class="btn-accion">Insertar números <i class="fa-solid fa-wand-magic-sparkles"></i></button>
+        <!-- 9. Marca de agua -->
+        <div id="panel-marca" class="tarjeta-herramienta" style="display: none;">
+            <button class="btn-secundario" onclick="cerrarHerramienta()" style="margin-bottom: 20px;">
+                <i class="fa-solid fa-arrow-left"></i> Volver al menú
+            </button>
+            <h2 class="titulo-herramienta"><i class="fa-solid fa-stamp"></i> Marca de agua</h2>
+            <div class="zona-subida">
+                <i class="fa-solid fa-cloud-arrow-up icono-subida"></i>
+                <label for="archivoMarca" class="btn-gigante">Elegir archivo PDF</label>
+                <input type="file" id="archivoMarca" accept="application/pdf">
             </div>
-
-            <!-- 11. Recortar PDF -->
-            <div id="herr-recortar" class="tarjeta-herramienta" style="display: none;">
-                <h2 class="titulo-herramienta"><i class="fa-solid fa-crop-simple"></i> Recortar PDF</h2>
-                <div class="zona-subida">
-                    <i class="fa-solid fa-cloud-arrow-up icono-subida"></i>
-                    <label for="archivoRecortar" class="btn-gigante">Elegir archivo PDF</label>
-                    <input type="file" id="archivoRecortar" accept="application/pdf" style="display: none;">
-                </div>
-                <div class="campo">
-                    <label><i class="fa-solid fa-compress"></i> Margen a recortar (%): <span id="valorMargen" style="color: var(--color-foco); font-weight: bold;">10</span>%</label>
-                    <input type="range" id="margenRecortar" min="0" max="40" value="10">
-                </div>
-                <button id="botonRecortar" class="btn-accion">Aplicar recorte <i class="fa-solid fa-wand-magic-sparkles"></i></button>
+            <div class="campo">
+                <label><i class="fa-solid fa-pen-nib"></i> Texto de marca de agua</label>
+                <input type="text" id="textoMarca" placeholder="Ej: CONFIDENCIAL">
             </div>
+            <button id="botonMarca" class="btn-accion">Insertar marca</button>
+        </div>
 
+        <!-- 10. Numerar Páginas -->
+        <div id="panel-numeros" class="tarjeta-herramienta" style="display: none;">
+            <button class="btn-secundario" onclick="cerrarHerramienta()" style="margin-bottom: 20px;">
+                <i class="fa-solid fa-arrow-left"></i> Volver al menú
+            </button>
+            <h2 class="titulo-herramienta"><i class="fa-solid fa-list-ol"></i> Numerar Páginas</h2>
+            <div class="zona-subida">
+                <i class="fa-solid fa-cloud-arrow-up icono-subida"></i>
+                <label for="archivoNumeros" class="btn-gigante">Elegir archivo PDF</label>
+                <input type="file" id="archivoNumeros" accept="application/pdf">
+            </div>
+            <button id="botonNumeros" class="btn-accion">Insertar números</button>
+        </div>
+
+        <!-- 11. Recortar PDF -->
+        <div id="panel-recortar" class="tarjeta-herramienta" style="display: none;">
+            <button class="btn-secundario" onclick="cerrarHerramienta()" style="margin-bottom: 20px;">
+                <i class="fa-solid fa-arrow-left"></i> Volver al menú
+            </button>
+            <h2 class="titulo-herramienta"><i class="fa-solid fa-crop-simple"></i> Recortar PDF</h2>
+            <div class="zona-subida">
+                <i class="fa-solid fa-cloud-arrow-up icono-subida"></i>
+                <label for="archivoRecortar" class="btn-gigante">Elegir archivo PDF</label>
+                <input type="file" id="archivoRecortar" accept="application/pdf">
+            </div>
+            <div class="campo">
+                <label><i class="fa-solid fa-compress"></i> Margen (px): <span id="valorMargen">20</span></label>
+                <input type="range" id="margenRecortar" min="0" max="100" value="20">
+            </div>
+            <button id="botonRecortar" class="btn-accion">Aplicar recorte</button>
         </div>
     </div>
 
