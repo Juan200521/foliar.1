@@ -868,51 +868,77 @@ if (formRegistro) {
 }
 
 // ==========================================
-// LÓGICA DE INICIO DE SESIÓN (login.html)
+// LÓGICA DE INICIO DE SESIÓN CON BLOQUEO (login.html)
 // ==========================================
 const formLogin = document.getElementById('formulario-login');
 
 if (formLogin) {
     formLogin.addEventListener('submit', async (e) => {
-        e.preventDefault(); // Evita que la página se recargue sola
+        e.preventDefault();
 
         const btnSubmit = document.getElementById('btn-login-email');
         const errorDiv = document.getElementById('mensaje-error-login');
+        const email = document.getElementById('email-login').value.trim();
+        const password = document.getElementById('password-login').value;
 
-        // Limpiar errores previos
+        // Variables para el sistema de bloqueo temporal
+        const intentosKey = `intentos_${email}`;
+        const bloqueoKey = `bloqueo_${email}`;
+        const tiempoBloqueo = localStorage.getItem(bloqueoKey);
+
+        // 1. VERIFICAR SI EL USUARIO ESTÁ BLOQUEADO
+        if (tiempoBloqueo && Date.now() < parseInt(tiempoBloqueo)) {
+            const segundosRestantes = Math.ceil((parseInt(tiempoBloqueo) - Date.now()) / 1000);
+            errorDiv.style.display = 'block';
+            errorDiv.innerText = `Cuenta bloqueada por seguridad. Intenta de nuevo en ${segundosRestantes} segundos.`;
+            return; // Detiene el proceso, no intenta iniciar sesión
+        } else {
+            // Si el tiempo ya pasó, quitamos el candado
+            localStorage.removeItem(bloqueoKey);
+        }
+
+        // Configuración visual de carga
         errorDiv.style.display = 'none';
         btnSubmit.innerText = 'Comprobando...';
         btnSubmit.disabled = true;
 
-        // Capturar datos
-        const email = document.getElementById('email-login').value.trim();
-        const password = document.getElementById('password-login').value;
-
         try {
-            // Comprobar credenciales en Firebase
+            // 2. INTENTAR INICIAR SESIÓN
             await firebase.auth().signInWithEmailAndPassword(email, password);
             
-            // ¡Éxito! Nos vamos a la página principal
+            // ¡Éxito! Limpiamos el historial de errores y entramos
+            localStorage.removeItem(intentosKey);
             window.location.href = 'index.html';
 
         } catch (error) {
             console.error("Error al iniciar sesión:", error);
-            
-            // Mostrar mensaje de error al usuario
             errorDiv.style.display = 'block';
+            btnSubmit.innerText = 'Iniciar Sesión';
+            btnSubmit.disabled = false;
             
-            // Firebase tiene varios códigos de error si la clave o correo están mal
-            if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                errorDiv.innerText = 'El correo o la contraseña son incorrectos.';
+            // 3. MANEJO DE ERRORES Y CONTADOR DE INTENTOS
+            if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-login-credentials' || error.code === 'auth/invalid-credential') {
+                // Sumar un intento fallido
+                let intentosActuales = parseInt(localStorage.getItem(intentosKey)) || 0;
+                intentosActuales++;
+                
+                if (intentosActuales >= 3) {
+                    // Bloquear por 60 segundos (60,000 milisegundos)
+                    localStorage.setItem(bloqueoKey, Date.now() + 60000);
+                    localStorage.removeItem(intentosKey); // Reiniciamos el contador para cuando pase el minuto
+                    errorDiv.innerText = `Has fallado 3 veces. Cuenta bloqueada por 60 segundos.`;
+                } else {
+                    // Guardar el intento y avisar al usuario
+                    localStorage.setItem(intentosKey, intentosActuales);
+                    errorDiv.innerText = `Contraseña incorrecta. Intento ${intentosActuales} de 3.`;
+                }
+            } else if (error.code === 'auth/user-not-found') {
+                errorDiv.innerText = 'Este correo no está registrado en Foliar.';
             } else if (error.code === 'auth/too-many-requests') {
-                errorDiv.innerText = 'Demasiados intentos fallidos. Intenta más tarde.';
+                errorDiv.innerText = 'El servidor de Firebase te ha bloqueado por demasiados intentos. Espera unos minutos.';
             } else {
                 errorDiv.innerText = 'Ocurrió un error al iniciar sesión. Intenta de nuevo.';
             }
-            
-            // Restaurar el botón
-            btnSubmit.innerText = 'Iniciar Sesión';
-            btnSubmit.disabled = false;
         }
     });
 }
