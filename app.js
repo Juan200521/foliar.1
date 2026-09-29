@@ -120,33 +120,41 @@ vigilarInactividad();
 // Iniciar monitoreo
 vigilarInactividad();
 
-// Función para guardar en la nube automáticamente
-async function respaldarEnFoliarDrive(blob, nombreArchivo, herramienta) {
-    if (!usuarioActual) return;
-    
+// ==========================================
+// RESPALDO EN LA NUBE (Cloudinary + Firestore)
+// ==========================================
+async function respaldarEnFoliarDrive(blob, nombreArchivo, herramienta = "Foliar") {
+    const usuarioConectado = firebase.auth().currentUser;
+
+    if (!usuarioConectado) {
+        console.warn("Nadie conectado. Archivo procesado pero no respaldado.");
+        return; 
+    }
+
     try {
         const formData = new FormData();
-        formData.append("file", blob);
-        formData.append("upload_preset", CLOUDINARY_PRESET);
-        
+        // SOLUCIÓN: Le pasamos el 'nombreArchivo' como tercer dato para que Cloudinary no lo bautice con números raros
+        formData.append("file", blob, nombreArchivo);
+        formData.append("upload_preset", CLOUDINARY_PRESET); 
+
         const res = await fetch(CLOUDINARY_URL, { method: "POST", body: formData });
         const data = await res.json();
-        
+
         if (!data.secure_url) throw new Error("Fallo al obtener enlace seguro");
 
-        await db.collection("usuarios").doc(usuarioActual.uid).collection("archivos").add({
+        await db.collection("usuarios").doc(usuarioConectado.uid).collection("archivos").add({
             nombre: nombreArchivo,
-            herramienta: herramienta,
             url: data.secure_url,
+            herramienta: herramienta,
             fecha: firebase.firestore.FieldValue.serverTimestamp()
         });
-        
-        console.log("Archivo respaldado en Foliar Drive exitosamente.");
+
+        console.log("¡Archivo respaldado en Foliar Drive exitosamente con su nombre real!");
+
     } catch (error) {
         console.error("Error en respaldo en la nube:", error);
     }
 }
-
 // ==========================================
 // ESCUCHA EN TIEMPO REAL DEL HISTORIAL
 // ==========================================
@@ -206,8 +214,7 @@ if (!usuarioActual) return;
 // 3. MÓDULO DE SEGURIDAD Y VALIDACIÓN
 // ==========================================
 if (typeof pdfjsLib !== 'undefined') {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js'; // (Deja la URL exacta que tú ya tenías en esta línea)
-}
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';}
 const MAX_FILE_SIZE = 150 * 1024 * 1024; 
 
 function validarArchivoSeguro(archivo, mimePermitidos) {
@@ -347,7 +354,11 @@ document.getElementById('botonDividir')?.addEventListener('click', async () => {
         pdfPagina.addPage(pagina);
         zip.file(`pagina-${indice + 1}.pdf`, await pdfPagina.save());
       }
-      descargarBlob(await zip.generateAsync({ type: 'blob' }), generarNombre(files[0].name, 'paginas', '.zip'));
+      // AGREGADO: Respaldo para la opción ZIP
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const nombreZip = generarNombre(files[0].name, 'paginas', '.zip');
+      descargarBlob(zipBlob, nombreZip);
+      respaldarEnFoliarDrive(zipBlob, nombreZip, "Dividir PDF");
     } else {
       const pdfFinal = await PDFLib.PDFDocument.create();
       const paginas = await pdfFinal.copyPages(pdfOrigen, indices);
@@ -590,13 +601,23 @@ document.getElementById('botonPdf2Jpg')?.addEventListener('click', async () => {
       canvas.width = viewport.width; canvas.height = viewport.height;
       await pagina.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
       const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.92));
+      
       if (pdf.numPages === 1) { 
-        descargarBlob(blob, generarNombre(files[0].name, 'img', '.jpg')); 
+        // AGREGADO: Respaldo cuando es 1 sola imagen
+        const nombreImg = generarNombre(files[0].name, 'img', '.jpg');
+        descargarBlob(blob, nombreImg); 
+        respaldarEnFoliarDrive(blob, nombreImg, "PDF a JPG");
         return; 
       }
       zip.file(`pagina-${n}.jpg`, blob);
     }
-    descargarBlob(await zip.generateAsync({ type: 'blob' }), generarNombre(files[0].name, 'imagenes', '.zip'));
+    
+    // AGREGADO: Respaldo cuando es un archivo ZIP
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    const nombreZip = generarNombre(files[0].name, 'imagenes', '.zip');
+    descargarBlob(zipBlob, nombreZip);
+    respaldarEnFoliarDrive(zipBlob, nombreZip, "PDF a JPG");
+
   } catch (e) { manejarErrorControlado(e); }
 });
 
@@ -627,8 +648,12 @@ document.getElementById('botonPdf2Word')?.addEventListener('click', async () => 
       <body>${textoCompletoHTML}</body>
       </html>
     `;
+    
+    // AGREGADO: Respaldo del documento Word final
     const blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword' });
-    descargarBlob(blob, generarNombre(files[0].name, 'texto', '.doc'));
+    const nombreDoc = generarNombre(files[0].name, 'texto', '.doc');
+    descargarBlob(blob, nombreDoc);
+    respaldarEnFoliarDrive(blob, nombreDoc, "PDF a Word");
 
     document.getElementById(btnId).innerHTML = textoOriginal;
     document.getElementById(btnId).disabled = false;
@@ -654,13 +679,20 @@ document.getElementById('botonWord2Pdf')?.addEventListener('click', async () => 
     contenedorTemporal.style.fontSize = '14px';
     contenedorTemporal.style.color = '#000';
 
+    const nombrePdf = generarNombre(files[0].name, 'oficial', '.pdf');
     const opcionesPDF = {
-      margin: 15, filename: generarNombre(files[0].name, 'oficial', '.pdf'),
+      margin: 15, filename: nombrePdf,
       image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
+    // Descarga el archivo directamente en el navegador
     await html2pdf().set(opcionesPDF).from(contenedorTemporal).save();
+    
+    // AGREGADO: Obtiene el archivo oculto en memoria y lo respalda en la nube
+    const pdfBlob = await html2pdf().set(opcionesPDF).from(contenedorTemporal).output('blob');
+    respaldarEnFoliarDrive(pdfBlob, nombrePdf, "Word a PDF");
+
     document.getElementById(btnId).innerHTML = textoOriginal;
     document.getElementById(btnId).disabled = false;
   } catch (e) { manejarErrorControlado(e, btnId, textoOriginal); }
@@ -964,5 +996,79 @@ if (btnGoogle) {
                 errorDiv.innerText = 'Ocurrió un error al intentar acceder con Google.';
             }
         }
+    });
+}
+
+// ==========================================
+// CARGAR ARCHIVOS Y ABRIR PANEL
+// ==========================================
+const btnMisArchivos = document.getElementById('btn-historial');
+const modalDrive = document.getElementById('modal-drive');
+
+function cargarMisArchivos() {
+    const listaArchivos = document.getElementById('lista-archivos');
+    
+    // SOLUCIÓN: Consultamos directamente a Firebase en el momento del clic
+    const usuarioConectado = firebase.auth().currentUser; 
+    
+    if (!usuarioConectado) {
+        listaArchivos.innerHTML = '<p style="text-align: center; color: var(--texto-secundario);">Inicia sesión para ver tus archivos.</p>';
+        return;
+    }
+
+    // Buscamos en Firestore usando el ID del usuario real confirmado
+    db.collection("usuarios").doc(usuarioConectado.uid).collection("archivos")
+      .onSnapshot((snapshot) => {
+          listaArchivos.innerHTML = ''; // Borramos el texto de carga
+
+          if (snapshot.empty) {
+              listaArchivos.innerHTML = '<p style="text-align: center; color: var(--texto-secundario);">Aún no tienes archivos respaldados.</p>';
+              return;
+          }
+
+          // Guardamos en un array para ordenar por fecha
+          const archivosArray = [];
+          snapshot.forEach((doc) => archivosArray.push(doc.data()));
+
+          // Ordenamos: del más nuevo al más viejo
+          archivosArray.sort((a, b) => {
+              const fechaA = a.fecha ? a.fecha.toMillis() : 0;
+              const fechaB = b.fecha ? b.fecha.toMillis() : 0;
+              return fechaB - fechaA;
+          });
+
+          // Dibujamos cada archivo en la pantalla
+          archivosArray.forEach((archivo) => {
+              let fechaTexto = "Fecha desconocida";
+              if (archivo.fecha) {
+                  const fechaObj = archivo.fecha.toDate();
+                  fechaTexto = fechaObj.toLocaleDateString() + ' a las ' + fechaObj.toLocaleTimeString();
+              }
+
+              const tarjeta = document.createElement('div');
+              tarjeta.style = "background: var(--bg-secundario); padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--color-primario); margin-bottom: 10px;";
+              
+              tarjeta.innerHTML = `
+                  <div>
+                      <h4 style="margin: 0; color: var(--texto-principal); font-size: 16px;">${archivo.nombre || 'Documento.pdf'}</h4>
+                      <span style="color: var(--color-primario); font-size: 12px; font-weight: bold;">${archivo.herramienta || 'Foliar'}</span>
+                      <span style="color: var(--texto-secundario); font-size: 12px; margin-left: 10px;">${fechaTexto}</span>
+                  </div>
+                  <div>
+                      <a href="${archivo.url}" target="_blank" class="btn-primario" style="text-decoration: none; font-size: 14px; padding: 8px 12px;">
+                          <i class="fa-solid fa-download"></i> Descargar
+                      </a>
+                  </div>
+              `;
+              listaArchivos.appendChild(tarjeta);
+          });
+      });
+}
+
+// Al hacer clic en el botón, mostramos el modal y disparamos la magia
+if (btnMisArchivos && modalDrive) {
+    btnMisArchivos.addEventListener('click', () => {
+        modalDrive.style.display = 'block'; 
+        cargarMisArchivos(); 
     });
 }
