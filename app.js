@@ -32,45 +32,29 @@ const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}
 // ==========================================
 let usuarioActual = null;
 
-auth.onAuthStateChanged(user => {
-    // Detectamos si la URL actual tiene "login.html"
-    const estamosEnLogin = window.location.href.includes('login.html');
+firebase.auth().onAuthStateChanged((user) => {
+    // Traemos las cajas exactas del HTML
+    const panelVisitante = document.getElementById('panel-usuario');
+    const infoUsuario = document.getElementById('info-usuario');
+    const nombreUsuario = document.getElementById('nombre-usuario');
 
     if (user) {
-        usuarioActual = user;
-        
-        // --- REDIRECCIÓN MÁGICA ---
-        // Si el usuario ya inició sesión y la página actual es el Login, lo mandamos al index
-        if (estamosEnLogin) {
-            window.location.href = 'index.html';
-            return; // Importante para que no siga ejecutando el resto
-        }
+        // --- 1. MODO USUARIO CONECTADO ---
+        // Apagamos los botones de registro y ENCENDEMOS los de uso
+        if (panelVisitante) panelVisitante.style.display = 'none'; 
+        if (infoUsuario) infoUsuario.style.display = 'flex';       
 
-        // --- LÓGICA PARA INDEX.HTML ---
-        // Usamos ?. para que no dé error si estos elementos no existen
-        const btnLogin = document.getElementById('btn-login');
-        if (btnLogin) btnLogin.style.display = 'none';
-
-        const infoUsuario = document.getElementById('info-usuario');
-        if (infoUsuario) infoUsuario.style.display = 'flex';
-
-        const nombreUsuario = document.getElementById('nombre-usuario');
+        // Mostramos el nombre o correo del usuario
         if (nombreUsuario && user.displayName) {
-             // Mantengo tu formato: "Hola, Nombre"
-            nombreUsuario.textContent = `Hola, ${user.displayName.split(' ')[0]}`;
+             nombreUsuario.innerText = user.displayName;
+        } else if (nombreUsuario && user.email) {
+             nombreUsuario.innerText = user.email.split('@')[0]; 
         }
-
     } else {
-        usuarioActual = null;
-        
-        // Solo intentamos mostrar el botón si NO estamos en la página de login
-        if (!estamosEnLogin) {
-            const btnLogin = document.getElementById('btn-login');
-            if (btnLogin) btnLogin.style.display = 'inline-block';
-            
-            const infoUsuario = document.getElementById('info-usuario');
-            if (infoUsuario) infoUsuario.style.display = 'none';
-        }
+        // --- 2. MODO VISITANTE ---
+        // Encendemos los botones de registro y APAGAMOS los de uso
+        if (panelVisitante) panelVisitante.style.display = 'flex'; 
+        if (infoUsuario) infoUsuario.style.display = 'none';       
     }
 });
 
@@ -820,3 +804,139 @@ window.cerrarHerramienta = function() {
 
     window.scrollTo(0, 0);
 };
+// ==========================================
+// LÓGICA DE REGISTRO (registro.html)
+// ==========================================
+const formRegistro = document.getElementById('formulario-registro');
+
+if (formRegistro) {
+    formRegistro.addEventListener('submit', async (e) => {
+        e.preventDefault(); // Evita que la página se recargue
+
+        const btnSubmit = document.getElementById('btn-crear-cuenta');
+        const errorDiv = document.getElementById('mensaje-error-registro');
+
+        // Limpiar errores previos y cambiar estado del botón
+        errorDiv.style.display = 'none';
+        btnSubmit.innerText = 'Creando cuenta...';
+        btnSubmit.disabled = true;
+
+        // Capturar los valores de los campos
+        const nombre = document.getElementById('nombre-registro').value.trim();
+        const apellido = document.getElementById('apellido-registro').value.trim();
+        const telefono = document.getElementById('telefono-registro').value.trim();
+        const email = document.getElementById('email-registro').value.trim();
+        const password = document.getElementById('password-registro').value;
+
+        try {
+            // 1. Crear el usuario en Firebase Authentication
+            const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+            const user = userCredential.user;
+
+            // 2. Guardar los datos adicionales (Nombre, Apellido, Teléfono) en Firestore
+            await firebase.firestore().collection('usuarios').doc(user.uid).set({
+                nombre: nombre,
+                apellido: apellido,
+                telefono: telefono,
+                email: email,
+                fechaRegistro: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            // 3. ¡Éxito! Redirigir al usuario al panel principal
+            window.location.href = 'index.html';
+
+        } catch (error) {
+            console.error("Error en el registro:", error);
+            
+            // Mostrar mensajes de error limpios y seguros al usuario (sin revelar datos técnicos)
+            if (error.code === 'auth/email-already-in-use') {
+                errorDiv.innerText = 'Este correo ya está registrado. Por favor, inicia sesión.';
+            } else if (error.code === 'auth/invalid-email') {
+                errorDiv.innerText = 'El formato del correo no es válido.';
+            } else if (error.code === 'auth/weak-password') {
+                errorDiv.innerText = 'La contraseña es muy débil. Debe tener al menos 6 caracteres.';
+            } else {
+                errorDiv.innerText = 'Ocurrió un error inesperado al crear la cuenta. Intenta de nuevo.';
+            }
+            
+            // Restaurar el botón en caso de error
+            errorDiv.style.display = 'block';
+            btnSubmit.innerText = 'Crear Cuenta Segura';
+            btnSubmit.disabled = false;
+        }
+    });
+}
+
+// ==========================================
+// LÓGICA DE INICIO DE SESIÓN (login.html)
+// ==========================================
+const formLogin = document.getElementById('formulario-login');
+
+if (formLogin) {
+    formLogin.addEventListener('submit', async (e) => {
+        e.preventDefault(); // Evita que la página se recargue sola
+
+        const btnSubmit = document.getElementById('btn-login-email');
+        const errorDiv = document.getElementById('mensaje-error-login');
+
+        // Limpiar errores previos
+        errorDiv.style.display = 'none';
+        btnSubmit.innerText = 'Comprobando...';
+        btnSubmit.disabled = true;
+
+        // Capturar datos
+        const email = document.getElementById('email-login').value.trim();
+        const password = document.getElementById('password-login').value;
+
+        try {
+            // Comprobar credenciales en Firebase
+            await firebase.auth().signInWithEmailAndPassword(email, password);
+            
+            // ¡Éxito! Nos vamos a la página principal
+            window.location.href = 'index.html';
+
+        } catch (error) {
+            console.error("Error al iniciar sesión:", error);
+            
+            // Mostrar mensaje de error al usuario
+            errorDiv.style.display = 'block';
+            
+            // Firebase tiene varios códigos de error si la clave o correo están mal
+            if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                errorDiv.innerText = 'El correo o la contraseña son incorrectos.';
+            } else if (error.code === 'auth/too-many-requests') {
+                errorDiv.innerText = 'Demasiados intentos fallidos. Intenta más tarde.';
+            } else {
+                errorDiv.innerText = 'Ocurrió un error al iniciar sesión. Intenta de nuevo.';
+            }
+            
+            // Restaurar el botón
+            btnSubmit.innerText = 'Iniciar Sesión';
+            btnSubmit.disabled = false;
+        }
+    });
+}
+
+// ==========================================
+// LÓGICA DE INICIO DE SESIÓN CON GOOGLE (login.html)
+// ==========================================
+const btnGoogle = document.getElementById('btn-login-google');
+
+if (btnGoogle) {
+    btnGoogle.addEventListener('click', async () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        try {
+            // Abre la ventana emergente de Google
+            await firebase.auth().signInWithPopup(provider);
+            // ¡Éxito! Nos vamos a la página principal
+            window.location.href = 'index.html';
+        } catch (error) {
+            console.error("Error con Google:", error);
+            const errorDiv = document.getElementById('mensaje-error-login');
+            if(errorDiv) {
+                errorDiv.style.display = 'block';
+                errorDiv.innerText = 'Ocurrió un error al intentar acceder con Google.';
+            }
+        }
+    });
+}
